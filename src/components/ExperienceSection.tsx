@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { Building2, Calendar, MapPin } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const experiences = [
   {
@@ -55,6 +56,7 @@ const experiences = [
 export const ExperienceSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { t } = useLanguage();
 
   return (
     <section id="experiences" className="py-24 relative" ref={ref}>
@@ -66,10 +68,10 @@ export const ExperienceSection = () => {
           className="text-center mb-16"
         >
           <h2 className="section-title">
-            Expériences <span className="gradient-text">Professionnelles</span>
+            {t('experience.title')} <span className="gradient-text">{t('experience.title')}</span>
           </h2>
           <p className="section-subtitle mx-auto">
-            Mon parcours et mes contributions dans différentes entreprises
+            {t('about.description')}
           </p>
         </motion.div>
 

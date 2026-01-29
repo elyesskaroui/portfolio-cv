@@ -4,10 +4,12 @@ import { useRef, useState, useEffect } from "react";
 import { Mail, Phone, MapPin, Send, Github, Linkedin, ArrowUpRight, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import emailjs from '@emailjs/browser';
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const ContactSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",

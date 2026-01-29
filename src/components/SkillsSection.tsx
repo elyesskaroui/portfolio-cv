@@ -9,6 +9,7 @@ import {
   Wrench,
   Brain,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const skillCategories = [
   {
@@ -85,6 +86,7 @@ const getColorClasses = (color: string) => {
 export const SkillsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { t } = useLanguage();
 
   return (
     <section id="competences" className="py-24 relative" ref={ref}>
@@ -109,13 +111,13 @@ export const SkillsSection = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-premium mb-4"
           >
             <Code size={16} className="text-accent animate-pulse" />
-            <span className="text-sm text-foreground font-medium">Stack Technique</span>
+            <span className="text-sm text-foreground font-medium">{t('skills.title')}</span>
           </motion.div>
           <h2 className="section-title">
-            Compétences <span className="gradient-text-animated text-shadow-glow">Techniques</span>
+            {t('skills.title')} <span className="gradient-text-animated text-shadow-glow">{t('skills.title')}</span>
           </h2>
           <p className="section-subtitle mx-auto">
-            Un stack technique polyvalent et moderne pour créer des solutions innovantes
+            {t('about.description')}
           </p>
         </motion.div>
 

@@ -1,7 +1,9 @@
 import { Github, Linkedin, Mail, Heart } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { t, language } = useLanguage();
 
   return (
     <footer className="py-8 border-t border-border/50">
@@ -12,7 +14,7 @@ export const Footer = () => {
             <span className="gradient-text font-semibold">Karoui Elyess</span>
             <span>•</span>
             <span className="flex items-center gap-1">
-              Fait avec <Heart size={14} className="text-red-500 fill-red-500" /> en Tunisie
+              {t('footer.made')} <Heart size={14} className="text-red-500 fill-red-500" /> {language === 'fr' ? 'en Tunisie' : 'in Tunisia'}
             </span>
           </div>
 

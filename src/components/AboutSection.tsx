@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { Code2, Lightbulb, Target, Zap } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const qualities = [
   {
@@ -29,6 +30,7 @@ const qualities = [
 export const AboutSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { t } = useLanguage();
 
   return (
     <section id="apropos" className="py-24 relative" ref={ref}>
@@ -40,10 +42,10 @@ export const AboutSection = () => {
           className="text-center mb-16"
         >
           <h2 className="section-title">
-            À <span className="gradient-text">Propos</span>
+            {t('about.title').split(' ')[0]} <span className="gradient-text">{t('about.title').split(' ').slice(1).join(' ')}</span>
           </h2>
           <p className="section-subtitle mx-auto">
-            Développeur passionné avec une expertise Full Stack
+            {t('about.description')}
           </p>
         </motion.div>
 

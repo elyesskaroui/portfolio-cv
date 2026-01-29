@@ -1,20 +1,22 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github, Linkedin, Mail } from "lucide-react";
-
-const navLinks = [
-  { href: "#accueil", label: "Accueil" },
-  { href: "#apropos", label: "À Propos" },
-  { href: "#competences", label: "Compétences" },
-  { href: "#experiences", label: "Expériences" },
-  { href: "#projets", label: "Projets" },
-  { href: "#formation", label: "Formation" },
-  { href: "#contact", label: "Contact" },
-];
+import { Menu, X, Github, Linkedin, Mail, Languages } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
+
+  const navLinks = [
+    { href: "#accueil", label: t('nav.home') },
+    { href: "#apropos", label: t('nav.about') },
+    { href: "#competences", label: t('nav.skills') },
+    { href: "#experiences", label: t('nav.experience') },
+    { href: "#projets", label: t('nav.projects') },
+    { href: "#formation", label: t('nav.education') },
+    { href: "#contact", label: t('nav.contact') },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,8 +54,16 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* Social Links */}
+          {/* Social Links & Language Switcher */}
           <div className="hidden lg:flex items-center gap-4">
+            <button
+              onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-all duration-200"
+            >
+              <Languages size={18} />
+              <span className="uppercase">{language}</span>
+            </button>
+            <div className="w-px h-6 bg-border"></div>
             <a
               href="https://github.com/elyesskaroui"
               target="_blank"
@@ -99,6 +109,13 @@ export const Navbar = () => {
             className="fixed inset-0 z-40 glass pt-24 lg:hidden"
           >
             <div className="flex flex-col items-center gap-6 p-8">
+              <button
+                onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium glass-card hover:glow-primary transition-all"
+              >
+                <Languages size={20} />
+                <span className="uppercase">{language === 'fr' ? 'English' : 'Français'}</span>
+              </button>
               {navLinks.map((link, index) => (
                 <motion.a
                   key={link.href}

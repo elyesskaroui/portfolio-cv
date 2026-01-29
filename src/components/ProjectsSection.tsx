@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { ExternalLink, Github, Sparkles, Star, Play, X } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Dialog,
   DialogContent,
@@ -90,6 +91,7 @@ export const ProjectsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [selectedProject, setSelectedProject] = useState<typeof projects[0] | null>(null);
+  const { t } = useLanguage();
 
   return (
     <section id="projets" className="py-24 relative" ref={ref}>

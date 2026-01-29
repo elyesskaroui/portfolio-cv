@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { GraduationCap, Award, Users } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const education = [
   {
@@ -57,6 +58,7 @@ const activities = [
 export const EducationSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { t } = useLanguage();
 
   return (
     <section id="formation" className="py-24 relative" ref={ref}>

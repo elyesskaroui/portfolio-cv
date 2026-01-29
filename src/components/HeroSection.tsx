@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Mail, Phone, Sparkles, Code2, Cpu } from "lucide-react";
 import profileImage from "@/assets/elyess.png";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const HeroSection = () => {
+  const { t } = useLanguage();
   return (
     <section
       id="accueil"
@@ -70,7 +72,7 @@ export const HeroSection = () => {
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
               </span>
               <span className="text-sm text-foreground font-medium">
-                Disponible pour un stage PFE / alternance
+                {t('hero.availability')}
               </span>
               <Sparkles size={14} className="text-primary animate-pulse" />
             </motion.div>
@@ -93,11 +95,11 @@ export const HeroSection = () => {
             >
               <span className="flex items-center gap-2">
                 <Code2 size={28} className="text-primary" />
-                Développeur Full Stack
+                {t('hero.title')}
               </span>
               <span className="gradient-text-animated flex items-center gap-2">
                 <Cpu size={28} className="text-accent animate-pulse" />
-                Mobile & Backend
+                {t('hero.subtitle')}
               </span>
             </motion.h2>
 
@@ -107,9 +109,7 @@ export const HeroSection = () => {
               transition={{ delay: 0.5 }}
               className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0"
             >
-              Passionné par Flutter, NestJS, IA et l'innovation technologique.
-              Ingénieur informatique créant des applications mobiles et backend
-              robustes et innovantes.
+              {t('hero.description')}
             </motion.p>
 
             {/* CTA Buttons */}
@@ -125,7 +125,7 @@ export const HeroSection = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <span className="relative z-10">Voir mes projets</span>
+                <span className="relative z-10">{t('hero.cta.projects')}</span>
                 <ArrowDown size={18} className="relative z-10 animate-bounce-slow group-hover:translate-y-1 transition-transform" />
                 <span className="absolute inset-0 animate-shimmer" />
               </motion.a>
@@ -135,7 +135,7 @@ export const HeroSection = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Me contacter
+                {t('hero.cta.contact')}
               </motion.a>
             </motion.div>
 
