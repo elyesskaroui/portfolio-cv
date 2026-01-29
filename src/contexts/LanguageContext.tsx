@@ -32,13 +32,27 @@ const translations = {
     
     // About Section
     'about.title': 'À Propos',
+    'about.subtitle': 'Développeur passionné avec une expertise Full Stack',
     'about.description': 'Ingénieur Informatique passionné par le développement mobile et backend, je transforme des idées en applications performantes et intuitives.',
-    'about.passion.title': 'Ma Passion',
-    'about.passion.text': 'Le développement mobile avec Flutter, Kotlin et Swift, combiné à des backends robustes en NestJS et Python.',
-    'about.goal.title': 'Mon Objectif',
-    'about.goal.text': 'Créer des solutions innovantes qui résolvent de vrais problèmes utilisateurs avec une expérience exceptionnelle.',
-    'about.approach.title': 'Mon Approche',
-    'about.approach.text': 'Code propre, architecture scalable et apprentissage continu des dernières technologies.',
+    'about.intro1': 'Étudiant en',
+    'about.intro1.bold': 'Ingénierie Informatique',
+    'about.intro1.text': 'à ESPRIT, je suis spécialisé dans le développement d\'applications mobiles et backend. Ma passion pour la technologie m\'a conduit à maîtriser une variété d\'outils et de langages.',
+    'about.intro2': 'Je suis particulièrement expérimenté en',
+    'about.intro2.bold': 'Python, NestJS, Flutter',
+    'about.intro2.text': 'ainsi qu\'en développement iOS (Swift) et Android (Kotlin). Mon intérêt pour l\'',
+    'about.intro2.bold2': 'Intelligence Artificielle',
+    'about.intro2.text2': 'me pousse à explorer constamment de nouvelles solutions innovantes.',
+    'about.intro3': 'Actuellement en recherche active d\'un',
+    'about.intro3.bold': 'stage PFE ou alternance',
+    'about.intro3.text': 'je suis prêt à contribuer à des projets ambitieux et à apprendre auprès d\'équipes talentueuses.',
+    'about.quality.curious': 'Curieux',
+    'about.quality.curious.desc': 'Toujours à la recherche de nouvelles technologies et méthodologies',
+    'about.quality.rigorous': 'Rigoureux',
+    'about.quality.rigorous.desc': 'Attention aux détails et code de qualité',
+    'about.quality.autonomous': 'Autonome',
+    'about.quality.autonomous.desc': 'Capable de gérer des projets de A à Z',
+    'about.quality.passionate': 'Passionné',
+    'about.quality.passionate.desc': 'L\'innovation tech est ma passion quotidienne',
     
     // Skills Section
     'skills.title': 'Compétences',
@@ -107,13 +121,27 @@ const translations = {
     
     // About Section
     'about.title': 'About Me',
+    'about.subtitle': 'Passionate developer with Full Stack expertise',
     'about.description': 'Computer Engineer passionate about mobile and backend development, I transform ideas into performant and intuitive applications.',
-    'about.passion.title': 'My Passion',
-    'about.passion.text': 'Mobile development with Flutter, Kotlin and Swift, combined with robust backends in NestJS and Python.',
-    'about.goal.title': 'My Goal',
-    'about.goal.text': 'Create innovative solutions that solve real user problems with exceptional experience.',
-    'about.approach.title': 'My Approach',
-    'about.approach.text': 'Clean code, scalable architecture and continuous learning of the latest technologies.',
+    'about.intro1': 'Student in',
+    'about.intro1.bold': 'Computer Engineering',
+    'about.intro1.text': 'at ESPRIT, I specialize in mobile and backend application development. My passion for technology has led me to master a variety of tools and languages.',
+    'about.intro2': 'I am particularly experienced in',
+    'about.intro2.bold': 'Python, NestJS, Flutter',
+    'about.intro2.text': 'as well as iOS (Swift) and Android (Kotlin) development. My interest in',
+    'about.intro2.bold2': 'Artificial Intelligence',
+    'about.intro2.text2': 'drives me to constantly explore new innovative solutions.',
+    'about.intro3': 'Currently actively looking for a',
+    'about.intro3.bold': 'PFE internship or work-study',
+    'about.intro3.text': 'I am ready to contribute to ambitious projects and learn from talented teams.',
+    'about.quality.curious': 'Curious',
+    'about.quality.curious.desc': 'Always looking for new technologies and methodologies',
+    'about.quality.rigorous': 'Rigorous',
+    'about.quality.rigorous.desc': 'Attention to details and quality code',
+    'about.quality.autonomous': 'Autonomous',
+    'about.quality.autonomous.desc': 'Able to manage projects from A to Z',
+    'about.quality.passionate': 'Passionate',
+    'about.quality.passionate.desc': 'Tech innovation is my daily passion',
     
     // Skills Section
     'skills.title': 'Skills',
@@ -164,7 +192,7 @@ const translations = {
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('fr');
+  const [language, setLanguage] = useState<Language>('en');
 
   const t = (key: string): string => {
     return translations[language][key] || key;

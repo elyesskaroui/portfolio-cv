@@ -4,26 +4,26 @@ import { useRef } from "react";
 import { Code2, Lightbulb, Target, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const qualities = [
+const getQualities = (t: (key: string) => string) => [
   {
     icon: Lightbulb,
-    title: "Curieux",
-    description: "Toujours à la recherche de nouvelles technologies et méthodologies",
+    title: t('about.quality.curious'),
+    description: t('about.quality.curious.desc'),
   },
   {
     icon: Target,
-    title: "Rigoureux",
-    description: "Attention aux détails et code de qualité",
+    title: t('about.quality.rigorous'),
+    description: t('about.quality.rigorous.desc'),
   },
   {
     icon: Zap,
-    title: "Autonome",
-    description: "Capable de gérer des projets de A à Z",
+    title: t('about.quality.autonomous'),
+    description: t('about.quality.autonomous.desc'),
   },
   {
     icon: Code2,
-    title: "Passionné",
-    description: "L'innovation tech est ma passion quotidienne",
+    title: t('about.quality.passionate'),
+    description: t('about.quality.passionate.desc'),
   },
 ];
 
@@ -31,6 +31,7 @@ export const AboutSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { t } = useLanguage();
+  const qualities = getQualities(t);
 
   return (
     <section id="apropos" className="py-24 relative" ref={ref}>
@@ -58,23 +59,17 @@ export const AboutSection = () => {
             className="space-y-6"
           >
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Étudiant en <span className="text-primary font-semibold">Ingénierie Informatique</span> à 
-              ESPRIT, je suis spécialisé dans le développement d'applications 
-              mobiles et backend. Ma passion pour la technologie m'a conduit à 
-              maîtriser une variété d'outils et de langages.
+              {t('about.intro1')} <span className="text-primary font-semibold">{t('about.intro1.bold')}</span> {t('about.intro1.text')}
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Je suis particulièrement expérimenté en{" "}
-              <span className="text-secondary font-semibold">Python, NestJS, Flutter</span>, 
-              ainsi qu'en développement iOS (Swift) et Android (Kotlin). Mon intérêt 
-              pour l'<span className="text-accent font-semibold">Intelligence Artificielle</span> me 
-              pousse à explorer constamment de nouvelles solutions innovantes.
+              {t('about.intro2')}{" "}
+              <span className="text-secondary font-semibold">{t('about.intro2.bold')}</span>, 
+              {t('about.intro2.text')}<span className="text-accent font-semibold">{t('about.intro2.bold2')}</span> {t('about.intro2.text2')}
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Actuellement en recherche active d'un{" "}
-              <span className="gradient-text font-semibold">stage PFE ou alternance</span>, 
-              je suis prêt à contribuer à des projets ambitieux et à apprendre 
-              auprès d'équipes talentueuses.
+              {t('about.intro3')}{" "}
+              <span className="gradient-text font-semibold">{t('about.intro3.bold')}</span>, 
+              {t('about.intro3.text')}
             </p>
 
             <div className="flex flex-wrap gap-3 pt-4">
