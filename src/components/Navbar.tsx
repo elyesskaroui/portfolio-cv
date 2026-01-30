@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github, Linkedin, Mail, Languages } from "lucide-react";
+import { Menu, X, Github, Linkedin, Mail, Languages, ChevronDown } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -56,13 +62,29 @@ export const Navbar = () => {
 
           {/* Social Links & Language Switcher */}
           <div className="hidden lg:flex items-center gap-4">
-            <button
-              onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-all duration-200"
-            >
-              <Languages size={18} />
-              <span className="uppercase">{language}</span>
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-all duration-200">
+                  <Languages size={18} />
+                  <span className="uppercase">{language === 'fr' ? 'Français' : 'English'}</span>
+                  <ChevronDown size={16} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="glass-card border-primary/20">
+                <DropdownMenuItem 
+                  onClick={() => setLanguage('fr')}
+                  className={`cursor-pointer ${language === 'fr' ? 'bg-primary/20 text-primary' : ''}`}
+                >
+                  🇫🇷 Français
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setLanguage('en')}
+                  className={`cursor-pointer ${language === 'en' ? 'bg-primary/20 text-primary' : ''}`}
+                >
+                  🇬🇧 English
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="w-px h-6 bg-border"></div>
             <a
               href="https://github.com/elyesskaroui"
@@ -109,13 +131,29 @@ export const Navbar = () => {
             className="fixed inset-0 z-40 glass pt-24 lg:hidden"
           >
             <div className="flex flex-col items-center gap-6 p-8">
-              <button
-                onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium glass-card hover:glow-primary transition-all"
-              >
-                <Languages size={20} />
-                <span className="uppercase">{language === 'fr' ? 'English' : 'Français'}</span>
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium glass-card hover:glow-primary transition-all">
+                    <Languages size={20} />
+                    <span>{language === 'fr' ? 'Français' : 'English'}</span>
+                    <ChevronDown size={16} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="glass-card border-primary/20">
+                  <DropdownMenuItem 
+                    onClick={() => setLanguage('fr')}
+                    className={`cursor-pointer ${language === 'fr' ? 'bg-primary/20 text-primary' : ''}`}
+                  >
+                    🇫🇷 Français
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setLanguage('en')}
+                    className={`cursor-pointer ${language === 'en' ? 'bg-primary/20 text-primary' : ''}`}
+                  >
+                    🇬🇧 English
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               {navLinks.map((link, index) => (
                 <motion.a
                   key={link.href}

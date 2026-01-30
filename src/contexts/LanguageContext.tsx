@@ -25,10 +25,10 @@ const translations = {
     'hero.greeting': 'Bonjour, je suis',
     'hero.title': 'Développeur Full Stack',
     'hero.subtitle': 'Mobile & Backend',
-    'hero.description': 'Ingénieur Informatique passionné par le développement mobile (Flutter, Kotlin, Swift) et backend (NestJS, Python). En recherche de stage PFE ou alternance.',
+    'hero.description': 'Ingénieur Full Stack spécialisé en développement mobile et backend. Expert en conception d\'API et systèmes intelligents. Disponible pour stage PFE, alternance ou missions freelance.',
     'hero.cta.projects': 'Voir mes projets',
     'hero.cta.contact': 'Me contacter',
-    'hero.availability': 'Disponible pour stage PFE/alternance',
+    'hero.availability': 'Disponible pour stage PFE/alternance/missions freelance',
     
     // About Section
     'about.title': 'À Propos',
@@ -56,6 +56,8 @@ const translations = {
     
     // Skills Section
     'skills.title': 'Compétences',
+    'skills.subtitle': 'Maîtrise technique à 360°',
+    'skills.description': 'Stack technologique moderne et polyvalent pour créer des solutions complètes et performantes.',
     'skills.mobile': 'Développement Mobile',
     'skills.backend': 'Backend & APIs',
     'skills.tools': 'Outils & DevOps',
@@ -114,10 +116,10 @@ const translations = {
     'hero.greeting': 'Hello, I\'m',
     'hero.title': 'Full Stack Developer',
     'hero.subtitle': 'Mobile & Backend',
-    'hero.description': 'Computer Engineer passionate about mobile development (Flutter, Kotlin, Swift) and backend (NestJS, Python). Looking for an internship or work-study position.',
+    'hero.description': 'Full Stack Engineer specialized in mobile and backend development. Expert in API design and intelligent systems. Available for internship, work-study, or freelance missions.',
     'hero.cta.projects': 'View my projects',
     'hero.cta.contact': 'Contact me',
-    'hero.availability': 'Available for internship/work-study',
+    'hero.availability': 'Available for internship/work-study/freelance',
     
     // About Section
     'about.title': 'About Me',
@@ -145,6 +147,8 @@ const translations = {
     
     // Skills Section
     'skills.title': 'Skills',
+    'skills.subtitle': '360° Technical Mastery',
+    'skills.description': 'Modern and versatile tech stack to build complete and performant solutions.',
     'skills.mobile': 'Mobile Development',
     'skills.backend': 'Backend & APIs',
     'skills.tools': 'Tools & DevOps',
@@ -192,14 +196,24 @@ const translations = {
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  // Récupérer la langue depuis localStorage ou utiliser 'fr' par défaut
+  const [language, setLanguage] = useState<Language>(() => {
+    const savedLanguage = localStorage.getItem('language') as Language;
+    return savedLanguage || 'fr';
+  });
+
+  // Sauvegarder la langue dans localStorage quand elle change
+  const changeLanguage = (lang: Language) => {
+    setLanguage(lang);
+    localStorage.setItem('language', lang);
+  };
 
   const t = (key: string): string => {
     return translations[language][key] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

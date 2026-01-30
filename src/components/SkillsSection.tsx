@@ -114,10 +114,10 @@ export const SkillsSection = () => {
             <span className="text-sm text-foreground font-medium">{t('skills.title')}</span>
           </motion.div>
           <h2 className="section-title">
-            {t('skills.title')} <span className="gradient-text-animated text-shadow-glow">{t('skills.title')}</span>
+            {t('skills.title')} <span className="gradient-text-animated text-shadow-glow">{t('skills.subtitle')}</span>
           </h2>
           <p className="section-subtitle mx-auto">
-            {t('about.description')}
+            {t('skills.description')}
           </p>
         </motion.div>
 
