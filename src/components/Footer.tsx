@@ -1,45 +1,106 @@
-import { Github, Linkedin, Mail, Heart } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { ArrowUp } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { TranslationKey } from '@/i18n/translations';
+import { PROFILE } from '@/data/content';
+
+const FOOTER_NAV: { id: string; labelKey: TranslationKey }[] = [
+  { id: 'profil', labelKey: 'nav.about' },
+  { id: 'expertise', labelKey: 'nav.skills' },
+  { id: 'parcours', labelKey: 'nav.experience' },
+  { id: 'projets', labelKey: 'nav.projects' },
+  { id: 'formation', labelKey: 'nav.education' },
+  { id: 'contact', labelKey: 'nav.contact' },
+];
+
+const EXTERNAL = [
+  { label: 'GitHub', href: PROFILE.github },
+  { label: 'LinkedIn', href: PROFILE.linkedin },
+  { label: 'Email', href: `mailto:${PROFILE.email}` },
+];
 
 export const Footer = () => {
-  const currentYear = new Date().getFullYear();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
+  const year = new Date().getFullYear();
 
   return (
-    <footer className="py-8 border-t border-border/50">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <span>© {currentYear}</span>
-            <span className="gradient-text font-semibold">Karoui Elyess</span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              {t('footer.made')} <Heart size={14} className="text-red-500 fill-red-500" /> {language === 'fr' ? 'en Tunisie' : 'in Tunisia'}
-            </span>
+    <footer className="border-t border-border">
+      <div className="container py-16">
+        <div className="grid gap-12 md:grid-cols-12">
+          {/* Wordmark */}
+          <div className="md:col-span-6">
+            <p className="text-display-sm font-semibold tracking-tight text-foreground">
+              {PROFILE.name}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{t('footer.tagline')}</p>
+            <a
+              href={`mailto:${PROFILE.email}`}
+              className="link-underline mt-6 inline-flex text-sm text-muted-foreground hover:text-foreground"
+            >
+              {PROFILE.email}
+            </a>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Navigation */}
+          <nav className="md:col-span-3" aria-label={t('footer.nav')}>
+            <h2 className="eyebrow mb-4">{t('footer.nav')}</h2>
+            <ul className="space-y-2.5">
+              {FOOTER_NAV.map((item) => (
+                <li key={item.id}>
+                  <a
+                    href={`#${item.id}`}
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {t(item.labelKey)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* External links */}
+          <div className="md:col-span-3">
+            <h2 className="eyebrow mb-4">{t('footer.elsewhere')}</h2>
+            <ul className="space-y-2.5">
+              {EXTERNAL.map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    target={item.href.startsWith('http') ? '_blank' : undefined}
+                    rel="noopener noreferrer"
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+              <li>
+                <a
+                  href={PROFILE.resume}
+                  download
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  CV
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="mt-16 flex flex-col-reverse items-start justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            © {year} {PROFILE.name} — {t('footer.rights')}
+          </p>
+          <div className="flex items-center gap-6">
+            <p className="hidden font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:block">
+              {t('footer.built')}
+            </p>
             <a
-              href="https://github.com/elyesskaroui"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              href="#accueil"
+              className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Github size={20} />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/karoui-elyess-49109a223/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              <Linkedin size={20} />
-            </a>
-            <a
-              href="mailto:Karouielyess@gmail.com"
-              className="text-muted-foreground hover:text-secondary transition-colors"
-            >
-              <Mail size={20} />
+              {t('footer.backToTop')}
+              <ArrowUp size={13} />
             </a>
           </div>
         </div>

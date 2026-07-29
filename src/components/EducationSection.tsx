@@ -1,154 +1,76 @@
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
-import { GraduationCap, Award, Users } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
-
-const education = [
-  {
-    degree: "Ingénieur Informatique Full Stack",
-    school: "ESPRIT - École Supérieure Privée d'Ingénierie et de Technologies",
-    period: "2023 - 2026",
-    description: "Formation complète en développement logiciel, architecture système et technologies web/mobile.",
-    icon: GraduationCap,
-  },
-  {
-    degree: "Licence en Systèmes Embarqués",
-    school: "ISIMM - Institut Supérieur d'Informatique et de Mathématiques de Monastir",
-    period: "2019 - 2022",
-    description: "Spécialisation en systèmes embarqués, IoT et programmation bas niveau.",
-    icon: Award,
-  },
-  {
-    degree: "Baccalauréat Technique",
-    school: "Tunisie",
-    period: "2019",
-    description: "Fondations solides en sciences techniques et mathématiques.",
-    icon: Award,
-  },
-];
-
-const activities = [
-  {
-    name: "IEEE ESPRIT Student Branch",
-    role: "Membre actif",
-    period: "2023 - Présent",
-    description: "Participation aux événements tech, hackathons et conférences.",
-  },
-  {
-    name: "Club CPU",
-    role: "Membre",
-    period: "2019 - 2022",
-    description: "Club d'informatique et de programmation.",
-  },
-  {
-    name: "Club Espoir",
-    role: "Membre",
-    period: "2019 - 2022",
-    description: "Engagement social et bénévolat.",
-  },
-  {
-    name: "Club ATAST",
-    role: "Membre",
-    period: "2019 - 2022",
-    description: "Association tunisienne pour l'avancement de la science et la technologie.",
-  },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Reveal } from '@/components/common/Reveal';
+import { SectionHeader } from '@/components/common/SectionHeader';
+import { getActivities, getEducation } from '@/data/content';
 
 export const EducationSection = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const education = getEducation(language);
+  const activities = getActivities(language);
 
   return (
-    <section id="formation" className="py-24 relative" ref={ref}>
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="section-title">
-            Formation & <span className="gradient-text">Engagement</span>
-          </h2>
-          <p className="section-subtitle mx-auto">
-            Mon parcours académique et mes activités associatives
-          </p>
-        </motion.div>
+    <section id="formation" className="section">
+      <div className="container">
+        <SectionHeader
+          index="05"
+          eyebrow={t('education.eyebrow')}
+          title={t('education.title')}
+          lead={t('education.lead')}
+        />
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Education */}
-          <div>
-            <motion.h3
-              initial={{ opacity: 0, x: -20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="flex items-center gap-3 text-xl font-bold text-foreground mb-8"
-            >
-              <GraduationCap className="text-primary" />
-              Formation Académique
-            </motion.h3>
+        <div className="grid gap-16 lg:grid-cols-12 lg:gap-12">
+          {/* ---- Academic ---- */}
+          <div className="lg:col-span-7">
+            <Reveal>
+              <h3 className="eyebrow mb-8">{t('education.academic')}</h3>
+            </Reveal>
 
-            <div className="space-y-6">
-              {education.map((edu, index) => (
-                <motion.div
-                  key={edu.degree}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                  className="glass-card"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0">
-                      <edu.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-foreground">{edu.degree}</h4>
-                      <p className="text-primary text-sm font-medium">{edu.school}</p>
-                      <p className="text-muted-foreground text-sm mt-1">{edu.period}</p>
-                      <p className="text-muted-foreground text-sm mt-2">
-                        {edu.description}
+            <ol className="border-t border-border">
+              {education.map((entry, index) => (
+                <Reveal as="li" key={entry.id} delay={index * 0.06}>
+                  <article className="grid gap-3 border-b border-border py-7 sm:grid-cols-4 sm:gap-6">
+                    <p className="tabular font-mono text-xs uppercase tracking-[0.14em] text-accent-soft">
+                      {entry.period}
+                    </p>
+                    <div className="sm:col-span-3">
+                      <h4 className="font-semibold tracking-tight text-foreground">
+                        {entry.degree}
+                      </h4>
+                      <p className="mt-1 text-sm text-muted-foreground">{entry.school}</p>
+                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                        {entry.description}
                       </p>
                     </div>
-                  </div>
-                </motion.div>
+                  </article>
+                </Reveal>
               ))}
-            </div>
+            </ol>
           </div>
 
-          {/* Activities */}
-          <div>
-            <motion.h3
-              initial={{ opacity: 0, x: 20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="flex items-center gap-3 text-xl font-bold text-foreground mb-8"
-            >
-              <Users className="text-secondary" />
-              Activités & Engagement
-            </motion.h3>
+          {/* ---- Student organisations ---- */}
+          <div className="lg:col-span-5">
+            <Reveal>
+              <h3 className="eyebrow mb-8">{t('education.activities')}</h3>
+            </Reveal>
 
-            <div className="grid gap-4">
+            <ul className="grid gap-px overflow-hidden rounded-lg border border-border bg-border">
               {activities.map((activity, index) => (
-                <motion.div
-                  key={activity.name}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                  className="glass-card py-4"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold text-foreground">{activity.name}</h4>
-                    <span className="tech-badge-accent text-xs">{activity.period}</span>
+                <Reveal as="li" key={activity.id} delay={index * 0.05}>
+                  <div className="bg-background p-6 transition-colors duration-300 hover:bg-surface">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <h4 className="font-semibold text-foreground">{activity.name}</h4>
+                      <span className="tabular font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                        {activity.period}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-accent-soft">{activity.role}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {activity.description}
+                    </p>
                   </div>
-                  <p className="text-secondary text-sm font-medium">{activity.role}</p>
-                  <p className="text-muted-foreground text-sm mt-1">
-                    {activity.description}
-                  </p>
-                </motion.div>
+                </Reveal>
               ))}
-            </div>
+            </ul>
           </div>
         </div>
       </div>

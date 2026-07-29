@@ -1,283 +1,183 @@
-import { motion } from "framer-motion";
-import { ArrowDown, Github, Linkedin, Mail, Phone, Sparkles, Code2, Cpu } from "lucide-react";
-import profileImage from "@/assets/elyess.png";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowDown, ArrowUpRight, Download } from 'lucide-react';
+import profileImage from '@/assets/elyess.webp';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { TranslationKey } from '@/i18n/translations';
+import { HERO_STATS, PROFILE, TECH_MARQUEE } from '@/data/content';
 
 export const HeroSection = () => {
   const { t } = useLanguage();
+  const prefersReducedMotion = useReducedMotion();
+
+  // Headline lines animate in sequence; everything else follows on a shared clock.
+  const rise = (delay: number) => ({
+    initial: { opacity: 0, y: prefersReducedMotion ? 0 : 28 },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: prefersReducedMotion ? 0.2 : 0.8,
+      delay: prefersReducedMotion ? 0 : delay,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  });
+
   return (
-    <section
-      id="accueil"
-      className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20"
-    >
-      {/* Enhanced Background Effects with Mesh Gradient */}
-      <div className="absolute inset-0 overflow-hidden mesh-gradient">
-        <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl parallax-float" />
-        <div className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl parallax-float" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/10 rounded-full blur-3xl animate-pulse-slow" />
-        
-        {/* Floating Particles */}
-        <motion.div
-          animate={{ 
-            y: [-20, 20, -20],
-            x: [-10, 10, -10],
-            opacity: [0.3, 0.6, 0.3]
-          }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-20 left-[10%] w-3 h-3 bg-primary rounded-full blur-sm"
-        />
-        <motion.div
-          animate={{ 
-            y: [20, -20, 20],
-            x: [10, -10, 10],
-            opacity: [0.4, 0.7, 0.4]
-          }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className="absolute top-40 right-[15%] w-2 h-2 bg-secondary rounded-full blur-sm"
-        />
-        <motion.div
-          animate={{ 
-            y: [-15, 15, -15],
-            x: [15, -15, 15],
-            opacity: [0.3, 0.5, 0.3]
-          }}
-          transition={{ duration: 12, repeat: Infinity }}
-          className="absolute bottom-40 left-[20%] w-4 h-4 bg-accent rounded-full blur-sm"
-        />
-        
-        {/* Grid Pattern Overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'linear-gradient(hsl(217 91% 60%) 1px, transparent 1px), linear-gradient(90deg, hsl(217 91% 60%) 1px, transparent 1px)',
-          backgroundSize: '50px 50px'
-        }} />
+    <section id="accueil" className="relative overflow-hidden pt-32 md:pt-40">
+      {/* Background: a faint structural grid and a single accent halo, both
+          masked so they never hard-stop at the viewport edge. */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="bg-grid mask-fade-edges absolute inset-0 opacity-60" />
+        <div className="accent-halo absolute left-1/2 top-0 h-[560px] w-[900px] -translate-x-1/2 -translate-y-1/3" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-          {/* Text Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="flex-1 text-center lg:text-left"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-premium neon-glow mb-6"
-            >
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
+      <div className="container relative">
+        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+          {/* ---- Copy ---- */}
+          <div className="lg:col-span-7">
+            <motion.div {...rise(0)} className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                  {t('hero.status')}
+                </span>
               </span>
-              <span className="text-sm text-foreground font-medium">
-                {t('hero.availability')}
-              </span>
-              <Sparkles size={14} className="text-primary animate-pulse" />
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4"
-            >
-              <span className="text-foreground">Karoui</span>{" "}
-              <span className="gradient-text-animated text-shadow-glow">Elyess</span>
-            </motion.h1>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-semibold text-foreground/90 mb-4 flex items-center gap-3 justify-center lg:justify-start flex-wrap"
-            >
-              <span className="flex items-center gap-2">
-                <Code2 size={28} className="text-primary" />
-                {t('hero.title')}
-              </span>
-              <span className="gradient-text-animated flex items-center gap-2">
-                <Cpu size={28} className="text-accent animate-pulse" />
-                {t('hero.subtitle')}
-              </span>
-            </motion.h2>
-
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0"
+              {...rise(0.08)}
+              className="mt-8 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground"
             >
+              {PROFILE.name}
+              <span className="mx-2 text-border-strong">/</span>
+              {t('hero.role')}
+            </motion.p>
+
+            {/* `whitespace-nowrap` keeps each line whole, so the rag stays even
+                and no line ever breaks in an unintended place. */}
+            <h1 className="mt-4 text-display-xl font-semibold text-foreground">
+              {(
+                ['hero.headline.1', 'hero.headline.2', 'hero.headline.3'] as TranslationKey[]
+              ).map((key, index) => (
+                <motion.span
+                  key={key}
+                  {...rise(0.14 + index * 0.08)}
+                  className="block whitespace-nowrap"
+                >
+                  {index === 2 ? (
+                    <span className="text-muted-foreground">
+                      {t(key)}
+                      <span className="text-accent">.</span>
+                    </span>
+                  ) : (
+                    t(key)
+                  )}
+                </motion.span>
+              ))}
+            </h1>
+
+            <motion.p {...rise(0.42)} className="lead mt-8 max-w-xl">
               {t('hero.description')}
             </motion.p>
 
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start"
-            >
-              <motion.a 
-                href="#projets" 
-                className="btn-primary flex items-center gap-2 relative overflow-hidden group"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span className="relative z-10">{t('hero.cta.projects')}</span>
-                <ArrowDown size={18} className="relative z-10 animate-bounce-slow group-hover:translate-y-1 transition-transform" />
-                <span className="absolute inset-0 animate-shimmer" />
-              </motion.a>
-              <motion.a 
-                href="#contact" 
-                className="btn-outline gradient-border"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {t('hero.cta.contact')}
-              </motion.a>
+            <motion.div {...rise(0.5)} className="mt-10 flex flex-wrap items-center gap-3">
+              <a href="#projets" className="btn-primary group">
+                {t('hero.cta.primary')}
+                <ArrowDown
+                  size={16}
+                  className="transition-transform duration-300 group-hover:translate-y-0.5"
+                />
+              </a>
+              <a href={PROFILE.resume} download className="btn-secondary group">
+                <Download size={16} className="text-muted-foreground" />
+                {t('hero.cta.secondary')}
+              </a>
             </motion.div>
+          </div>
 
-            {/* Social Links */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="flex items-center gap-4 mt-8 justify-center lg:justify-start"
-            >
-              <motion.a
-                href="https://github.com/elyesskaroui"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-premium p-3 rounded-xl hover:neon-glow transition-all duration-300 hover:-translate-y-1"
-                whileHover={{ rotate: 5 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Github size={20} className="text-foreground" />
-              </motion.a>
-              <motion.a
-                href="https://www.linkedin.com/in/karoui-elyess-49109a223/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-premium p-3 rounded-xl hover:neon-glow transition-all duration-300 hover:-translate-y-1"
-                whileHover={{ rotate: -5 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Linkedin size={20} className="text-foreground" />
-              </motion.a>
-              <motion.a
-                href="mailto:Karouielyess@gmail.com"
-                className="glass-premium p-3 rounded-xl hover:neon-glow transition-all duration-300 hover:-translate-y-1"
-                whileHover={{ rotate: 5 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Mail size={20} className="text-foreground" />
-              </motion.a>
-              <motion.a
-                href="tel:+21655448132"
-                className="glass-premium p-3 rounded-xl hover:neon-glow transition-all duration-300 hover:-translate-y-1"
-                whileHover={{ rotate: -5 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Phone size={20} className="text-foreground" />
-              </motion.a>
-            </motion.div>
-          </motion.div>
-
-          {/* Profile Image with Premium Effects */}
+          {/* ---- Portrait ---- */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex-1 flex justify-center lg:justify-end"
+            transition={{ duration: 1, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-5"
           >
-            <div className="relative">
-              {/* Animated Glow Rings */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent rounded-full blur-3xl opacity-50 animate-pulse-slow" />
-              <div className="absolute inset-[-20px] bg-gradient-to-br from-primary via-secondary to-accent rounded-full blur-2xl opacity-30 pulse-ring" />
-              
-              {/* Main Image Container */}
-              <motion.div 
-                className="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden border-4 border-primary/50 glass-premium"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20 z-10" />
+            <figure className="group relative mx-auto max-w-sm lg:ml-auto lg:mr-0">
+              {/* Offset frame — a printed-plate device rather than a glow */}
+              <div className="absolute -bottom-3 -right-3 h-full w-full rounded-lg border border-border-strong transition-transform duration-500 ease-editorial group-hover:translate-x-1 group-hover:translate-y-1" />
+
+              <div className="relative overflow-hidden rounded-lg border border-border bg-surface">
                 <img
                   src={profileImage}
-                  alt="Karoui Elyess"
-                  className="w-full h-full object-cover object-top hover:scale-110 transition-transform duration-700"
+                  alt={t('hero.portrait.alt')}
+                  width={463}
+                  height={572}
+                  loading="eager"
+                  fetchPriority="high"
+                  className="aspect-[4/5] w-full object-cover object-top grayscale transition-[filter,transform] duration-700 ease-editorial group-hover:scale-[1.02] group-hover:grayscale-0"
                 />
-                
-                {/* Overlay Shimmer Effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-shimmer" />
-              </motion.div>
-              
-              {/* Floating Elements with Enhanced Animations */}
-              <motion.div
-                animate={{ 
-                  y: [-15, 15, -15],
-                  rotate: [0, 10, 0]
-                }}
-                transition={{ duration: 4, repeat: Infinity }}
-                className="absolute -top-6 -right-6 glass-premium p-4 rounded-2xl neon-glow hover:scale-125 transition-transform cursor-pointer"
-              >
-                <span className="text-3xl">🚀</span>
-              </motion.div>
-              
-              <motion.div
-                animate={{ 
-                  y: [15, -15, 15],
-                  rotate: [0, -10, 0]
-                }}
-                transition={{ duration: 5, repeat: Infinity }}
-                className="absolute -bottom-6 -left-6 glass-premium p-4 rounded-2xl neon-glow hover:scale-125 transition-transform cursor-pointer"
-              >
-                <span className="text-3xl">💻</span>
-              </motion.div>
-              
-              <motion.div
-                animate={{ 
-                  x: [-10, 10, -10],
-                  rotate: [0, 15, 0]
-                }}
-                transition={{ duration: 6, repeat: Infinity }}
-                className="absolute top-1/2 -right-8 glass-premium p-3 rounded-xl neon-glow hover:scale-125 transition-transform cursor-pointer"
-              >
-                <span className="text-2xl">⚡</span>
-              </motion.div>
-              
-              <motion.div
-                animate={{ 
-                  x: [10, -10, 10],
-                  rotate: [0, -15, 0]
-                }}
-                transition={{ duration: 7, repeat: Infinity }}
-                className="absolute top-1/3 -left-8 glass-premium p-3 rounded-xl neon-glow hover:scale-125 transition-transform cursor-pointer"
-              >
-                <span className="text-2xl">🎯</span>
-              </motion.div>
-            </div>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
+              </div>
+
+              <figcaption className="absolute bottom-4 left-4 right-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                <span>{PROFILE.name}</span>
+                <span>Tunis</span>
+              </figcaption>
+            </figure>
           </motion.div>
         </div>
+
+        {/* ---- Stats ---- */}
+        <motion.dl
+          {...rise(0.6)}
+          className="mt-20 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3"
+        >
+          {HERO_STATS.map((stat) => (
+            <div key={stat.labelKey} className="bg-background px-6 py-7">
+              <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                {t(stat.labelKey as TranslationKey)}
+              </dt>
+              <dd className="tabular mt-2 text-4xl font-semibold tracking-tight text-foreground">
+                {stat.value}
+              </dd>
+            </div>
+          ))}
+        </motion.dl>
       </div>
 
-      {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <a href="#apropos" className="flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-          <span className="text-sm">Scroll</span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+      {/* ---- Technology marquee ---- */}
+      <motion.div {...rise(0.7)} className="mt-16 border-y border-border py-4">
+        <div className="marquee-paused mask-fade-x overflow-hidden" aria-hidden="true">
+          <div className="marquee-track gap-10 pr-10">
+            {/* Duplicated once so the -50% translation loops seamlessly */}
+            {[...TECH_MARQUEE, ...TECH_MARQUEE].map((tech, index) => (
+              <span
+                key={`${tech}-${index}`}
+                className="whitespace-nowrap font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground"
+              >
+                {tech}
+                <span className="ml-10 text-border-strong">◆</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ---- Scroll cue ---- */}
+      <motion.div {...rise(0.8)} className="container mt-10 pb-8">
+        <a
+          href="#profil"
+          className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {t('hero.scroll')}
+          <motion.span
+            animate={prefersReducedMotion ? undefined : { y: [0, 4, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="inline-flex"
           >
-            <ArrowDown size={20} />
-          </motion.div>
+            <ArrowUpRight size={13} className="rotate-45" />
+          </motion.span>
         </a>
       </motion.div>
     </section>

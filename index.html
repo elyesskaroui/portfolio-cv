@@ -2,26 +2,89 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/image/cv_icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Karoui Elyess | Développeur Full Stack Mobile & Backend</title>
-    <meta name="description" content="Portfolio de Karoui Elyess, Ingénieur Informatique spécialisé en développement mobile (Flutter, Kotlin, Swift) et backend (NestJS, Python). Disponible pour stage PFE ou alternance." />
-    <meta name="keywords" content="développeur, full stack, mobile, flutter, nestjs, python, kotlin, swift, ingénieur, informatique, tunisie" />
+    <meta name="theme-color" content="#0c0c0e" />
+
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Fonts: warm the connection, then load the stylesheet without blocking
+         first paint. `media="print"` makes it non-blocking; the onload handler
+         promotes it to `all` once it has arrived. `display=swap` in the URL
+         means text renders immediately in a fallback face meanwhile. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'; this.onload=null;"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      />
+    </noscript>
+
+    <title>Karoui Elyess — Ingénieur Full Stack & Développeur Mobile</title>
+    <meta
+      name="description"
+      content="Portfolio de Karoui Elyess, ingénieur full stack spécialisé en développement mobile (Flutter, SwiftUI, Kotlin) et backend (NestJS, Node.js, Python). Diplômé d'ESPRIT en 2026, disponible immédiatement."
+    />
     <meta name="author" content="Karoui Elyess" />
-    
-    <!-- Open Graph / Social Media -->
+    <link rel="canonical" href="https://elyess.dev/" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Karoui Elyess | Développeur Full Stack" />
-    <meta property="og:description" content="Ingénieur Informatique passionné par Flutter, NestJS et l'IA. Découvrez mes projets et expériences." />
-    <meta property="og:url" content="https://elyess.dev" />
-    
+    <meta property="og:site_name" content="Karoui Elyess" />
+    <meta property="og:title" content="Karoui Elyess — Ingénieur Full Stack & Développeur Mobile" />
+    <meta
+      property="og:description"
+      content="Applications mobiles et APIs pensées pour durer. Découvrez mes projets, mon parcours et ma stack."
+    />
+    <meta property="og:url" content="https://elyess.dev/" />
+    <meta property="og:image" content="https://elyess.dev/og-image.png" />
+    <meta property="og:image:alt" content="Karoui Elyess, ingénieur full stack" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="en_US" />
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Karoui Elyess | Développeur Full Stack" />
-    <meta name="twitter:description" content="Ingénieur Informatique passionné par Flutter, NestJS et l'IA." />
-    
-    <!-- Canonical -->
-    <link rel="canonical" href="https://elyess.dev" />
+    <meta name="twitter:title" content="Karoui Elyess — Ingénieur Full Stack & Développeur Mobile" />
+    <meta
+      name="twitter:description"
+      content="Applications mobiles et APIs pensées pour durer. Découvrez mes projets, mon parcours et ma stack."
+    />
+    <meta name="twitter:image" content="https://elyess.dev/og-image.png" />
+
+    <!-- Structured data: helps search engines render a rich person result -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Karoui Elyess",
+        "url": "https://elyess.dev/",
+        "image": "https://elyess.dev/og-image.png",
+        "jobTitle": "Ingénieur Full Stack & Développeur Mobile",
+        "email": "mailto:Karouielyess@gmail.com",
+        "address": { "@type": "PostalAddress", "addressLocality": "Tunis", "addressCountry": "TN" },
+        "alumniOf": [
+          { "@type": "CollegeOrUniversity", "name": "ESPRIT" },
+          { "@type": "CollegeOrUniversity", "name": "ISIMM" }
+        ],
+        "knowsAbout": ["Flutter", "NestJS", "Python", "SwiftUI", "Kotlin", "TypeScript"],
+        "sameAs": [
+          "https://github.com/elyesskaroui",
+          "https://www.linkedin.com/in/karoui-elyess-49109a223/"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

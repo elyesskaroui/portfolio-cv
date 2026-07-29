@@ -1,109 +1,97 @@
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
-import { Code2, Lightbulb, Target, Zap } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { TranslationKey } from '@/i18n/translations';
+import { Reveal } from '@/components/common/Reveal';
+import { SectionHeader } from '@/components/common/SectionHeader';
 
-const getQualities = (t: (key: string) => string) => [
-  {
-    icon: Lightbulb,
-    title: t('about.quality.curious'),
-    description: t('about.quality.curious.desc'),
-  },
-  {
-    icon: Target,
-    title: t('about.quality.rigorous'),
-    description: t('about.quality.rigorous.desc'),
-  },
-  {
-    icon: Zap,
-    title: t('about.quality.autonomous'),
-    description: t('about.quality.autonomous.desc'),
-  },
-  {
-    icon: Code2,
-    title: t('about.quality.passionate'),
-    description: t('about.quality.passionate.desc'),
-  },
+const VALUES: { titleKey: TranslationKey; bodyKey: TranslationKey }[] = [
+  { titleKey: 'about.value.1.title', bodyKey: 'about.value.1.body' },
+  { titleKey: 'about.value.2.title', bodyKey: 'about.value.2.body' },
+  { titleKey: 'about.value.3.title', bodyKey: 'about.value.3.body' },
+  { titleKey: 'about.value.4.title', bodyKey: 'about.value.4.body' },
+];
+
+const FACTS: { labelKey: TranslationKey; valueKey: TranslationKey }[] = [
+  { labelKey: 'about.facts.location', valueKey: 'about.facts.location.value' },
+  { labelKey: 'about.facts.availability', valueKey: 'about.facts.availability.value' },
+  { labelKey: 'about.facts.focus', valueKey: 'about.facts.focus.value' },
+  { labelKey: 'about.facts.languages', valueKey: 'about.facts.languages.value' },
 ];
 
 export const AboutSection = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { t } = useLanguage();
-  const qualities = getQualities(t);
 
   return (
-    <section id="apropos" className="py-24 relative" ref={ref}>
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="section-title">
-            {t('about.title').split(' ')[0]} <span className="gradient-text">{t('about.title').split(' ').slice(1).join(' ')}</span>
-          </h2>
-          <p className="section-subtitle mx-auto">
-            {t('about.description')}
-          </p>
-        </motion.div>
+    <section id="profil" className="section">
+      <div className="container">
+        <SectionHeader
+          index="01"
+          eyebrow={t('about.eyebrow')}
+          title={t('about.title')}
+          lead={t('about.lead')}
+        />
 
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Text Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-6"
-          >
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              {t('about.intro1')} <span className="text-primary font-semibold">{t('about.intro1.bold')}</span> {t('about.intro1.text')}
-            </p>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              {t('about.intro2')}{" "}
-              <span className="text-secondary font-semibold">{t('about.intro2.bold')}</span>, 
-              {t('about.intro2.text')}<span className="text-accent font-semibold">{t('about.intro2.bold2')}</span> {t('about.intro2.text2')}
-            </p>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              {t('about.intro3')}{" "}
-              <span className="gradient-text font-semibold">{t('about.intro3.bold')}</span>, 
-              {t('about.intro3.text')}
-            </p>
-
-            <div className="flex flex-wrap gap-3 pt-4">
-              {["Python", "NestJS", "Flutter", "Swift", "Kotlin", "IA"].map((tech) => (
-                <span key={tech} className="tech-badge">
-                  {tech}
-                </span>
-              ))}
+        <div className="grid gap-16 lg:grid-cols-12 lg:gap-12">
+          {/* ---- Narrative ---- */}
+          <div className="lg:col-span-7">
+            <div className="space-y-6">
+              {(['about.body.1', 'about.body.2', 'about.body.3'] as TranslationKey[]).map(
+                (key, index) => (
+                  <Reveal key={key} delay={index * 0.08}>
+                    <p
+                      className={
+                        index === 0
+                          ? 'text-lead leading-relaxed text-foreground'
+                          : 'leading-relaxed text-muted-foreground'
+                      }
+                    >
+                      {t(key)}
+                    </p>
+                  </Reveal>
+                ),
+              )}
             </div>
-          </motion.div>
 
-          {/* Qualities Grid */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="grid grid-cols-2 gap-4"
-          >
-            {qualities.map((quality, index) => (
-              <motion.div
-                key={quality.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                className="glass-card group cursor-pointer"
-              >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <quality.icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-semibold text-foreground mb-2">{quality.title}</h3>
-                <p className="text-sm text-muted-foreground">{quality.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
+            {/* Facts table — a definition list reads as a document, not a widget */}
+            <Reveal delay={0.24}>
+              <dl className="mt-12 divide-y divide-border border-y border-border">
+                {FACTS.map((fact) => (
+                  <div key={fact.labelKey} className="grid grid-cols-3 gap-4 py-4">
+                    <dt className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      {t(fact.labelKey)}
+                    </dt>
+                    <dd className="col-span-2 text-sm text-foreground">{t(fact.valueKey)}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Reveal>
+          </div>
+
+          {/* ---- Working principles ---- */}
+          <div className="lg:col-span-5">
+            <Reveal>
+              <h3 className="eyebrow mb-8">{t('about.values.title')}</h3>
+            </Reveal>
+
+            <ol className="space-y-px overflow-hidden rounded-lg border border-border bg-border">
+              {VALUES.map((value, index) => (
+                <Reveal as="li" key={value.titleKey} delay={0.06 * index}>
+                  <div className="group bg-background p-6 transition-colors duration-300 hover:bg-surface">
+                    <div className="flex items-baseline gap-3">
+                      <span className="tabular font-mono text-[11px] text-accent">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      <h4 className="text-base font-semibold text-foreground">
+                        {t(value.titleKey)}
+                      </h4>
+                    </div>
+                    <p className="mt-2 pl-8 text-sm leading-relaxed text-muted-foreground">
+                      {t(value.bodyKey)}
+                    </p>
+                  </div>
+                </Reveal>
+              ))}
+            </ol>
+          </div>
         </div>
       </div>
     </section>

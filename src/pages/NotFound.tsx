@@ -1,23 +1,33 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Link, useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
+  const { pathname } = useLocation();
+  const { t } = useLanguage();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-muted-foreground">Oops! Page not found</p>
-        <a href="/" className="text-primary underline hover:text-primary/90">
-          Return to Home
-        </a>
+    <main className="relative flex min-h-screen items-center overflow-hidden">
+      <div
+        className="bg-grid mask-fade-edges pointer-events-none absolute inset-0 opacity-60"
+        aria-hidden="true"
+      />
+
+      <div className="container relative">
+        <p className="tabular font-mono text-xs uppercase tracking-[0.2em] text-accent">404</p>
+        <h1 className="mt-4 text-display-lg font-semibold text-foreground">{t('notFound.title')}</h1>
+        <p className="lead mt-4 max-w-md">{t('notFound.body')}</p>
+        <p className="mt-2 truncate font-mono text-xs text-muted-foreground">{pathname}</p>
+
+        <Link to="/" className="btn-primary group mt-10">
+          <ArrowLeft
+            size={16}
+            className="transition-transform duration-300 group-hover:-translate-x-0.5"
+          />
+          {t('notFound.cta')}
+        </Link>
       </div>
-    </div>
+    </main>
   );
 };
 

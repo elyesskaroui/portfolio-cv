@@ -1,73 +1,89 @@
-# Welcome to your Lovable project
+# Portfolio — Karoui Elyess
 
-## Project info
+Portfolio personnel d'un ingénieur full stack (mobile & backend). Site d'une seule page,
+bilingue français / anglais, avec formulaire de contact.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**Stack :** Vite · React 18 · TypeScript · Tailwind CSS · shadcn/ui · Framer Motion
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Démarrer
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm install
+npm run dev      # serveur de développement sur http://localhost:5173
 ```
 
-**Edit a file directly in GitHub**
+| Commande | Effet |
+| --- | --- |
+| `npm run dev` | Serveur de développement avec rechargement à chaud |
+| `npm run build` | Build de production dans `dist/` |
+| `npm run preview` | Sert le build de production localement |
+| `npm run lint` | ESLint sur l'ensemble du projet |
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Organisation
 
-**Use GitHub Codespaces**
+```
+src/
+├── components/
+│   ├── common/        Reveal (animation d'apparition), SectionHeader
+│   ├── ui/            composants shadcn/ui
+│   └── *Section.tsx   une section de la page par fichier
+├── contexts/          LanguageContext (français / anglais)
+├── data/content.ts    contenu structuré et localisé (parcours, projets, formation)
+├── i18n/              chaînes d'interface typées
+└── index.css          design system : tokens de couleur, composants, utilitaires
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Modifier le contenu
 
-## What technologies are used for this project?
+- **Textes d'interface** (menus, boutons, titres) → `src/i18n/translations.ts`
+- **Parcours, projets, formation** → `src/data/content.ts`
+- **Coordonnées, liens, CV, logo** → constante `PROFILE` dans `src/data/content.ts`
 
-This project is built with:
+Le français fait référence : le type `TranslationKey` en est déduit et la table anglaise
+est typée `Record<TranslationKey, string>`. Ajouter une clé d'un seul côté, ou se tromper
+dans un appel `t()`, provoque une **erreur de compilation** plutôt qu'un texte manquant
+en production.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Design system
 
-## How can I deploy this project?
+Toutes les couleurs viennent de variables CSS définies dans `src/index.css`. Changer
+l'ambiance du site revient à modifier le bloc `:root` — aucun composant ne contient de
+couleur en dur.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## Ressources statiques
 
-## Can I connect a custom domain to my Lovable project?
+| Fichier | Rôle |
+| --- | --- |
+| `public/cv-karoui-elyess.pdf` | CV téléchargeable (boutons « Télécharger le CV ») |
+| `public/new_logo.png` | Logo de la barre de navigation |
+| `public/favicon.png`, `public/apple-touch-icon.png` | Icônes du site |
+| `public/videos/*.mp4` | Démos, encodées en H.264 720p avec `+faststart` |
+| `public/posters/*.jpg` | Vignettes affichées avant le chargement des vidéos |
 
-Yes, you can!
+> Les vidéos sont servies en statique et versionnées dans le dépôt. Si de nouvelles
+> démos sont ajoutées, les réencoder en 720p avant de les committer — les fichiers bruts
+> d'enregistrement d'écran font facilement plusieurs dizaines de mégaoctets chacun.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Formulaire de contact
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+L'envoi passe par [EmailJS](https://www.emailjs.com/). Les identifiants sont publics par
+conception (ils sont embarqués dans le bundle client) mais restent configurables :
+
+```sh
+cp .env.example .env   # puis renseigner les valeurs
+```
+
+Sans fichier `.env`, les identifiants par défaut du code sont utilisés.
+
+**À faire côté EmailJS :** restreindre les domaines autorisés dans le tableau de bord.
+C'est la seule protection réelle contre l'utilisation du point d'envoi par un tiers.
+Un champ piège (honeypot) filtre déjà les robots les plus simples.
+
+## Déploiement
+
+Site statique : `npm run build` produit `dist/`, déployable tel quel sur Vercel, Netlify,
+GitHub Pages ou tout hébergeur de fichiers.
+
+Une seule configuration est nécessaire : comme il s'agit d'une application monopage,
+toutes les routes doivent être redirigées vers `index.html`, sans quoi un rafraîchissement
+sur une URL inconnue renverra une erreur 404 du serveur au lieu de la page 404 du site.
