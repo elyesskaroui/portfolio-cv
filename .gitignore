@@ -30,3 +30,6 @@ dist-ssr
 
 # Vercel
 .vercel
+
+# Cache incremental de TypeScript (genere par tsc -b)
+*.tsbuildinfo

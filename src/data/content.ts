@@ -1,4 +1,4 @@
-import type { Language } from '@/i18n/translations';
+import type { Language, TranslationKey } from '@/i18n/translations';
 
 /* ==========================================================================
    Structured content, localised.
@@ -18,11 +18,11 @@ export const PROFILE = {
   logo: '/new_logo.png',
 } as const;
 
-export const HERO_STATS = [
+export const HERO_STATS: { value: string; labelKey: TranslationKey }[] = [
   { value: '07', labelKey: 'hero.stat.projects' },
   { value: '06', labelKey: 'hero.stat.experiences' },
   { value: '30+', labelKey: 'hero.stat.technologies' },
-] as const;
+];
 
 /** Flat list used by the marquee strip under the hero. */
 export const TECH_MARQUEE = [
@@ -51,7 +51,7 @@ export const TECH_MARQUEE = [
 
 export interface SkillCategory {
   id: string;
-  titleKey: string;
+  titleKey: TranslationKey;
   skills: string[];
 }
 

@@ -1,5 +1,4 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-import type { TranslationKey } from '@/i18n/translations';
 import { Reveal } from '@/components/common/Reveal';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { SKILL_CATEGORIES } from '@/data/content';
@@ -25,7 +24,7 @@ export const SkillsSection = () => {
               <article className="group flex h-full flex-col bg-background p-7 transition-colors duration-300 hover:bg-surface">
                 <header className="flex items-baseline justify-between gap-4">
                   <h3 className="text-base font-semibold tracking-tight text-foreground">
-                    {t(category.titleKey as TranslationKey)}
+                    {t(category.titleKey)}
                   </h3>
                   <span className="tabular font-mono text-[11px] text-muted-foreground transition-colors duration-300 group-hover:text-accent">
                     {String(index + 1).padStart(2, '0')}

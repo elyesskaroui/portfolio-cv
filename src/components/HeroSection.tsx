@@ -136,7 +136,7 @@ export const HeroSection = () => {
           {HERO_STATS.map((stat) => (
             <div key={stat.labelKey} className="bg-background px-6 py-7">
               <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                {t(stat.labelKey as TranslationKey)}
+                {t(stat.labelKey)}
               </dt>
               <dd className="tabular mt-2 text-4xl font-semibold tracking-tight text-foreground">
                 {stat.value}
