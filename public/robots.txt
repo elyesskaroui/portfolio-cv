@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://elyess.dev/sitemap.xml
+Sitemap: https://elyess-karoui.vercel.app/sitemap.xml
