@@ -31,8 +31,8 @@ export interface Resume {
 }
 
 export const RESUMES: Record<Language, Resume> = {
-  fr: { href: '/cv/elyess-karoui-fr.pdf', file: 'CV_Elyess_Karoui_Ingénieur full stack.pdf', sizeKb: 71 },
-  en: { href: '/cv/elyess-karoui-en.pdf', file: 'CV_Elyess_Karoui_Full_Stack_EN.pdf', sizeKb: 69 },
+  fr: { href: '/cv/elyess-karoui-fr.pdf', file: 'CV_Elyess_Karoui_Ingénieur_Full stack.pdf', sizeKb: 71 },
+  en: { href: '/cv/elyess-karoui-en.pdf', file: 'CV_Elyess_Karoui_Full_Stack_AN.pdf', sizeKb: 69 },
 };
 
 /* --- Hero video -------------------------------------------------------------
