@@ -28,6 +28,11 @@ const ghostLetters = (text: string, offset: number) =>
    The avatar's horizontal centre (from the head) is published as
    --avatar-x on .hero-media so the name splits exactly behind him.
    ------------------------------------------------------------------------ */
+/** Every browser on iPhone / iPad is WebKit (iPadOS reports itself as a Mac). */
+const isIOS = () =>
+  typeof navigator !== 'undefined' &&
+  (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
 const OCC_W = 192;
 const OCC_H = 240;
 const BG_LUMA = 250;
@@ -40,7 +45,8 @@ const useOccluder = (
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas) return;
+    // iOS shows the clip without the blend (see index.css): no silhouette needed.
+    if (!video || !canvas || isIOS()) return;
     const sample = document.createElement('canvas');
     sample.width = OCC_W;
     sample.height = OCC_H;
@@ -201,7 +207,14 @@ const HeroVideoPlayer = ({ sectionRef }: { sectionRef: React.RefObject<HTMLEleme
       setTouched(true);
     }
 
-    if (!prefersReducedMotion()) {
+    if (!prefersReducedMotion() && isIOS()) {
+      // iOS in-app browsers (Messenger, Instagram…) may report unmuted
+      // autoplay as successful while staying silent. Start muted and let the
+      // first tap switch the voice on, which iOS always honours.
+      video.muted = true;
+      video.play().catch(() => undefined);
+      unlockEvents.forEach((type) => window.addEventListener(type, unlock));
+    } else if (!prefersReducedMotion()) {
       video.muted = false;
       video
         .play()

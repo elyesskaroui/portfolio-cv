@@ -5519,3 +5519,48 @@
     animation: none;
   }
 }
+
+/* ==========================================================================
+   iPhone / iPad (every iOS browser is WebKit): WebKit does not composite a
+   <video> under mix-blend-mode and the clip can vanish entirely. There, the
+   clip sits in the same lit arch as in dark mode, with no blend at all, and
+   the canvas silhouette (only needed for the blend) is switched off.
+   `-webkit-touch-callout` is only supported on iOS.
+   ========================================================================== */
+@supports (-webkit-touch-callout: none) {
+  .hero-blend,
+  .hero-media video,
+  .dark .hero-blend {
+    mix-blend-mode: normal;
+  }
+  .hero-occluder {
+    display: none;
+  }
+  .hero-stage {
+    isolation: isolate;
+    overflow: hidden;
+    left: calc(var(--avatar-x, 50%) - 39%);
+    right: auto;
+    width: 78%;
+    top: 0;
+    border-radius: 999px 999px 32px 32px;
+    /* The clip's own background is pure white: match it so no edge shows. */
+    background: #fff;
+    box-shadow: 0 0 0 1px hsl(var(--border)), 0 50px 100px -50px rgba(0, 0, 0, 0.35);
+  }
+  .hero-stage video {
+    position: absolute;
+    top: 0;
+    left: calc((39% - var(--avatar-x, 50%)) * 100 / 78);
+    width: calc(100% * 100 / 78);
+    max-width: none;
+  }
+  .hero-ghost {
+    --avatar-gap: calc(min(74svh, 800px) * 0.8 * 0.39 + 14px);
+  }
+  @media (max-width: 1023px) {
+    .hero-ghost {
+      display: none;
+    }
+  }
+}
