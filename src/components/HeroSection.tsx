@@ -318,8 +318,11 @@ const HeroVideoPlayer = ({ sectionRef }: { sectionRef: React.RefObject<HTMLEleme
           setCaption(HERO_CAPTIONS.findIndex((cue) => time >= cue.start && time < cue.end));
         }}
       >
-        {HERO_VIDEO.webm && <source src={HERO_VIDEO.webm} type="video/webm" />}
+        {/* H.264 MP4 first: every browser plays it. iOS claims WebM support,
+            picks the VP9 file, then fails to decode it and never falls back,
+            which left the hero blank and silent on iPhones. */}
         <source src={HERO_VIDEO.mp4} type="video/mp4" />
+        {HERO_VIDEO.webm && <source src={HERO_VIDEO.webm} type="video/webm" />}
       </video>
       </div>
 
