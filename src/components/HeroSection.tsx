@@ -263,13 +263,48 @@ const HeroVideoPlayer = ({ sectionRef }: { sectionRef: React.RefObject<HTMLEleme
     }
   }, []);
 
+  // ?debug in the URL: live readout of the clip's state, to diagnose phones.
+  const [debug, setDebug] = useState('');
+  useEffect(() => {
+    if (!/[?&]debug/.test(window.location.search)) return;
+    const id = window.setInterval(() => {
+      const v = videoRef.current;
+      if (!v) return;
+      const r = v.getBoundingClientRect();
+      const cs = getComputedStyle(v);
+      const stage = v.parentElement?.getBoundingClientRect();
+      setDebug(
+        [
+          `build ${__BUILD__}`,
+          `ios ${isIOS()} · css-ios ${CSS.supports('-webkit-touch-callout', 'none')}`,
+          `ready ${v.readyState} · net ${v.networkState} · err ${v.error?.code ?? '-'}`,
+          `paused ${v.paused} · muted ${v.muted} · t ${v.currentTime.toFixed(1)}`,
+          `src ${v.currentSrc.split('/').pop() || '-'} · ${v.videoWidth}x${v.videoHeight}`,
+          `video ${Math.round(r.x)},${Math.round(r.y)} ${Math.round(r.width)}x${Math.round(r.height)}`,
+          `stage ${stage ? `${Math.round(stage.width)}x${Math.round(stage.height)}` : '-'}`,
+          `opacity ${cs.opacity} · vis ${cs.visibility} · blend ${cs.mixBlendMode} · disp ${cs.display}`,
+          navigator.userAgent.slice(0, 120),
+        ].join('\n'),
+      );
+    }, 500);
+    return () => window.clearInterval(id);
+  }, []);
+
   if (!HERO_VIDEO) return null;
 
   return (
     <>
+      {debug && (
+        <pre className="fixed inset-x-2 bottom-2 z-[200] whitespace-pre-wrap rounded-xl bg-black/85 p-3 font-mono text-[10px] leading-snug text-white">
+          {debug}
+        </pre>
+      )}
       <canvas ref={occluderRef} width={OCC_W} height={OCC_H} className="hero-occluder" aria-hidden="true" />
       {/* Dark theme only: a paper-coloured arch the clip is multiplied onto. */}
       <div className="hero-stage">
+      {/* iOS fallback: if WebKit fails to paint the clip, the still frame
+          underneath keeps the avatar on screen (hidden elsewhere by CSS). */}
+      {HERO_VIDEO.poster && <img src={HERO_VIDEO.poster} alt="" aria-hidden="true" className="hero-still" />}
       <video
         ref={videoRef}
         muted
