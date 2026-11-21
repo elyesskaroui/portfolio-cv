@@ -54,7 +54,7 @@ couleur en dur.
 
 | Fichier | Rôle |
 | --- | --- |
-| `public/cv-karoui-elyess.pdf` | CV téléchargeable (boutons « Télécharger le CV ») |
+| `public/cv/elyess-karoui-fr.pdf`, `public/cv/elyess-karoui-en.pdf` | CV français et anglais, proposés au choix dans la fenêtre « CV » (`RESUMES` dans `src/data/content.ts`) |
 | `public/new_logo.png` | Logo de la barre de navigation |
 | `public/favicon.png`, `public/apple-touch-icon.png` | Icônes du site |
 | `public/videos/*.mp4` | Démos, encodées en H.264 720p avec `+faststart` |

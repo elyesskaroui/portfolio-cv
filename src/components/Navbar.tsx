@@ -1,232 +1,236 @@
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion, useScroll, useSpring } from 'framer-motion';
-import { ArrowUpRight, Menu, X } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ArrowDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Language, TranslationKey } from '@/i18n/translations';
 import { PROFILE } from '@/data/content';
+import { ResumeDialog } from '@/components/common/ResumeDialog';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 
 const NAV_ITEMS: { id: string; labelKey: TranslationKey }[] = [
   { id: 'profil', labelKey: 'nav.about' },
   { id: 'expertise', labelKey: 'nav.skills' },
-  { id: 'parcours', labelKey: 'nav.experience' },
-  { id: 'projets', labelKey: 'nav.projects' },
-  { id: 'formation', labelKey: 'nav.education' },
+  { id: 'projets', labelKey: 'nav.work' },
+  { id: 'parcours', labelKey: 'nav.journey' },
+  { id: 'engagement', labelKey: 'nav.engagement' },
   { id: 'contact', labelKey: 'nav.contact' },
 ];
 
 const LANGUAGES: Language[] = ['fr', 'en'];
 
-export const Navbar = () => {
+const LanguageToggle = () => {
   const { language, setLanguage, t } = useLanguage();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>('');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  return (
+    <div
+      role="group"
+      aria-label={t('nav.language')}
+      className="flex items-center rounded-full bg-card p-1 shadow-[inset_0_0_0_1px_var(--line-alpha)]"
+    >
+      {LANGUAGES.map((lang) => (
+        <button
+          key={lang}
+          type="button"
+          onClick={() => setLanguage(lang)}
+          aria-pressed={language === lang}
+          className={`rounded-full px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider transition-colors duration-300 ${
+            language === lang ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {lang}
+        </button>
+      ))}
+    </div>
+  );
+};
 
-  // Reading-progress bar
-  const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
+export const Navbar = () => {
+  const { t } = useLanguage();
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [indicator, setIndicator] = useState<{ x: number; w: number } | null>(null);
 
+  const progressRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLDivElement>(null);
+  const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Scroll state + progress bar (written straight to the DOM, no re-render per frame).
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 24);
-    onScroll();
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = max > 0 ? window.scrollY / max : 0;
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${ratio})`;
+      setScrolled(window.scrollY > 40);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
 
-  // Highlight whichever section currently occupies the middle of the viewport.
+  // Active section: whichever crosses the band just above the middle of the viewport.
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActiveSection(visible.target.id);
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        });
       },
-      { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.25, 0.5, 1] },
+      { rootMargin: '-45% 0px -50% 0px' },
     );
-
+    const hero = document.getElementById('accueil');
+    if (hero) observer.observe(hero);
     NAV_ITEMS.forEach(({ id }) => {
       const element = document.getElementById(id);
       if (element) observer.observe(element);
     });
-
     return () => observer.disconnect();
   }, []);
 
-  // Prevent the page behind the mobile overlay from scrolling.
+  // Slide the ink pill under the active link.
+  const { language } = useLanguage();
+  useLayoutEffect(() => {
+    const link = linkRefs.current[active];
+    const pill = pillRef.current;
+    if (!link || !pill) {
+      setIndicator(null);
+      return;
+    }
+    setIndicator({ x: link.offsetLeft, w: link.offsetWidth });
+  }, [active, language]);
+
+  // Mobile overlay: lock scroll, close on Escape, return focus to the button.
   useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? 'hidden' : '';
+    if (!menuOpen) return;
+    document.body.style.overflow = 'hidden';
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
     };
-  }, [isMenuOpen]);
-
-  // Close the overlay on Escape.
-  useEffect(() => {
-    if (!isMenuOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsMenuOpen(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isMenuOpen]);
+  }, [menuOpen]);
 
   return (
     <>
       <a
         href="#contenu"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-foreground focus:px-4 focus:py-2 focus:text-sm focus:text-background"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-full focus:bg-foreground focus:px-4 focus:py-2 focus:text-sm focus:text-background"
       >
-        {language === 'fr' ? 'Aller au contenu' : 'Skip to content'}
+        {t('nav.skip')}
       </a>
 
-      <header
-        className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ease-editorial ${
-          isScrolled || isMenuOpen
-            ? 'border-b border-border bg-background/80 backdrop-blur-xl'
-            : 'border-b border-transparent'
-        }`}
-      >
-        <div className="container flex h-16 items-center justify-between gap-6 md:h-20">
-          {/* Wordmark */}
-          <a
-            href="#accueil"
-            className="group flex items-center gap-2.5 text-sm font-semibold tracking-tight text-foreground"
-          >
-            <img
-              src={PROFILE.logo}
-              alt=""
-              width={32}
-              height={32}
-              className="h-8 w-8 rounded-[7px] transition-transform duration-300 ease-editorial group-hover:scale-105"
-            />
-            {/* Kept in the accessibility tree at every width: hiding it with
-                `hidden` left the logo link with no discernible name on mobile. */}
-            <span className="sr-only sm:not-sr-only">{PROFILE.name}</span>
+      <div ref={progressRef} className="nav-progress" aria-hidden="true" />
+
+      <header className="fixed inset-x-0 top-0 z-[60]">
+        <div className="wrap flex h-[76px] items-center justify-between gap-4">
+          <a href="#accueil" className="nav-home flex items-center gap-3" aria-label={t('nav.home')}>
+            <img src="/logo-ke.svg" alt="" width={40} height={40} className="nav-mark" />
+            <span
+              className={`nav-name hidden text-[15px] font-semibold tracking-tight sm:inline ${
+                scrolled && !menuOpen ? 'is-hidden' : ''
+              }`}
+            >
+              {PROFILE.name}
+            </span>
           </a>
 
-          {/* Desktop navigation */}
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Principale">
-            {NAV_ITEMS.map((item) => {
-              const isActive = activeSection === item.id;
-              return (
+          <nav aria-label={t('nav.main')} className="hidden lg:block">
+            <div ref={pillRef} className={`nav-pill ${scrolled ? 'is-glass' : ''}`}>
+              <span
+                className="nav-indicator"
+                aria-hidden="true"
+                style={{
+                  width: indicator?.w ?? 0,
+                  transform: `translateX(${indicator?.x ?? 0}px)`,
+                  opacity: indicator ? 1 : 0,
+                }}
+              />
+              {NAV_ITEMS.map((item) => (
                 <a
                   key={item.id}
+                  ref={(el) => (linkRefs.current[item.id] = el)}
                   href={`#${item.id}`}
-                  aria-current={isActive ? 'true' : undefined}
-                  className={`relative rounded px-3 py-2 text-sm transition-colors duration-200 ${
-                    isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                  aria-current={active === item.id ? 'location' : undefined}
+                  className={`nav-link ${active === item.id ? 'is-active' : ''}`}
                 >
                   {t(item.labelKey)}
-                  {isActive && (
-                    <motion.span
-                      layoutId="nav-active"
-                      className="absolute inset-x-3 -bottom-px h-px bg-accent"
-                      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                    />
-                  )}
                 </a>
-              );
-            })}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            {/* Language toggle — a segmented control reads cleaner than a dropdown */}
-            <div
-              className="flex items-center rounded-md border border-border p-0.5"
-              role="group"
-              aria-label={t('nav.language')}
-            >
-              {LANGUAGES.map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => setLanguage(lang)}
-                  aria-pressed={language === lang}
-                  className={`rounded px-2 py-1 font-mono text-[11px] uppercase tracking-wider transition-colors duration-200 ${
-                    language === lang
-                      ? 'bg-foreground text-background'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {lang}
-                </button>
               ))}
             </div>
+          </nav>
 
-            <a
-              href={PROFILE.resume}
-              download
-              className="hidden items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm text-foreground transition-colors duration-200 hover:border-border-strong hover:bg-surface md:inline-flex"
-            >
-              CV
-              <ArrowUpRight size={14} className="text-muted-foreground" />
-            </a>
-
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle />
+            <LanguageToggle />
+            <ResumeDialog>
+              <button type="button" className="btn-primary hidden !px-4 !py-2.5 md:inline-flex">
+                {t('hero.cta.resume')}
+                <ArrowDown size={14} />
+              </button>
+            </ResumeDialog>
             <button
+              ref={menuButtonRef}
               type="button"
-              onClick={() => setIsMenuOpen((open) => !open)}
-              aria-expanded={isMenuOpen}
-              aria-label={isMenuOpen ? t('nav.menu.close') : t('nav.menu.open')}
-              className="grid h-9 w-9 place-items-center rounded-md border border-border text-foreground transition-colors hover:bg-surface lg:hidden"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-expanded={menuOpen}
+              aria-controls="menu-mobile"
+              aria-label={menuOpen ? t('nav.menu.close') : t('nav.menu.open')}
+              className="btn-secondary !px-4 !py-2.5 lg:hidden"
             >
-              {isMenuOpen ? <X size={16} /> : <Menu size={16} />}
+              <span aria-hidden="true">{menuOpen ? '✕' : t('nav.menu')}</span>
             </button>
           </div>
         </div>
-
-        {/* Reading progress */}
-        <motion.div
-          style={{ scaleX: progress }}
-          className="h-px origin-left bg-accent"
-          aria-hidden="true"
-        />
       </header>
 
-      {/* Mobile overlay */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40 bg-background pt-16 lg:hidden"
-          >
-            <nav className="container flex flex-col pt-8" aria-label="Mobile">
-              {NAV_ITEMS.map((item, index) => (
-                <motion.a
-                  key={item.id}
-                  href={`#${item.id}`}
-                  onClick={() => setIsMenuOpen(false)}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 + index * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex items-baseline gap-4 border-b border-border py-5 text-2xl font-semibold tracking-tight text-foreground"
-                >
-                  <span className="tabular font-mono text-xs text-muted-foreground">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  {t(item.labelKey)}
-                </motion.a>
-              ))}
-
-              <motion.a
-                href={PROFILE.resume}
-                download
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.4 }}
-                className="btn-primary mt-8 w-full"
-              >
-                {t('hero.cta.secondary')}
-                <ArrowUpRight size={16} />
-              </motion.a>
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div
+        id="menu-mobile"
+        className={`nav-overlay lg:hidden ${menuOpen ? 'is-open' : ''}`}
+        aria-hidden={!menuOpen}
+      >
+        <nav aria-label={t('nav.main')} className="wrap flex h-full flex-col justify-center pb-10 pt-24">
+          {NAV_ITEMS.map((item, index) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              tabIndex={menuOpen ? 0 : -1}
+              onClick={() => setMenuOpen(false)}
+              className="big flex items-baseline gap-5 border-b border-border py-4 text-[clamp(2rem,9vw,3.5rem)] font-bold leading-none tracking-[-0.045em]"
+              style={{ '--i': index } as React.CSSProperties}
+            >
+              <span className="tabular font-mono text-xs font-normal tracking-normal text-muted-foreground">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              {t(item.labelKey)}
+            </a>
+          ))}
+          <ResumeDialog>
+            <button
+              type="button"
+              tabIndex={menuOpen ? 0 : -1}
+              className="big btn-primary mt-10 self-start"
+              style={{ '--i': NAV_ITEMS.length } as React.CSSProperties}
+            >
+              {t('hero.cta.resume')} <ArrowDown size={15} />
+            </button>
+          </ResumeDialog>
+        </nav>
+      </div>
     </>
   );
 };

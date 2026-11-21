@@ -12,11 +12,11 @@
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     },
     {
-      "source": "/(videos|posters)/(.*)",
+      "source": "/(videos|posters|hero)/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }]
     },
     {
-      "source": "/cv-karoui-elyess.pdf",
+      "source": "/cv/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }]
     },
     {

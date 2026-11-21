@@ -1,185 +1,423 @@
-import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowDown, ArrowUpRight, Download } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import profileImage from '@/assets/elyess.webp';
 import { useLanguage } from '@/contexts/LanguageContext';
-import type { TranslationKey } from '@/i18n/translations';
-import { HERO_STATS, PROFILE, TECH_MARQUEE } from '@/data/content';
+import { HERO_CAPTIONS, HERO_VIDEO, PROFILE } from '@/data/content';
+import { ResumeDialog } from '@/components/common/ResumeDialog';
+import { prefersReducedMotion } from '@/lib/hooks';
+
+const stagger = (i: number) => ({ '--i': i }) as React.CSSProperties;
+
+/* Each letter of the big name gets its index (--l), so the CSS can rise them
+   in one by one (E → S) and then run a soft light wave across them. */
+const ghostLetters = (text: string, offset: number) =>
+  [...text].map((char, i) => (
+    <span key={i} className="ghost-letter" style={{ '--l': offset + i } as React.CSSProperties}>
+      {char}
+    </span>
+  ));
+
+/* ---------------------------------------------------------------------------
+   Live silhouette of the avatar, painted in white between the big name and
+   the video. The clip has a pure white background and is blended with
+   multiply, so without it the name would show through the white shirt.
+   Each frame is sampled on a grid; the background is flood-filled from the
+   borders (near-white pixels connected to the edge), everything else is the
+   body. Short holes (shirt highlights touching the background) are closed
+   along rows and columns. No outward padding, so there is no halo.
+   The avatar's horizontal centre (from the head) is published as
+   --avatar-x on .hero-media so the name splits exactly behind him.
+   ------------------------------------------------------------------------ */
+const OCC_W = 192;
+const OCC_H = 240;
+const BG_LUMA = 250;
+const MAX_GAP = 5;
+
+const useOccluder = (
+  videoRef: React.RefObject<HTMLVideoElement>,
+  canvasRef: React.RefObject<HTMLCanvasElement>,
+) => {
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    const sample = document.createElement('canvas');
+    sample.width = OCC_W;
+    sample.height = OCC_H;
+    const sctx = sample.getContext('2d', { willReadFrequently: true });
+    const ctx = canvas.getContext('2d');
+    if (!sctx || !ctx) return;
+    const out = ctx.createImageData(OCC_W, OCC_H);
+    const N = OCC_W * OCC_H;
+    const light = new Uint8Array(N);
+    const body = new Uint8Array(N);
+    const queue = new Int32Array(N);
+    let centred = false;
+
+    // Fill background runs no longer than MAX_GAP that sit between body cells.
+    const closeGaps = (start: number, step: number, count: number) => {
+      let last = -1;
+      for (let k = 0; k < count; k++) {
+        const i = start + k * step;
+        if (!body[i]) continue;
+        if (last !== -1 && k - last > 1 && k - last - 1 <= MAX_GAP) {
+          for (let j = last + 1; j < k; j++) body[start + j * step] = 2;
+        }
+        last = k;
+      }
+    };
+
+    const draw = () => {
+      if (video.readyState < 2) return;
+      sctx.drawImage(video, 0, 0, OCC_W, OCC_H);
+      const px = sctx.getImageData(0, 0, OCC_W, OCC_H).data;
+      for (let i = 0; i < N; i++) {
+        light[i] = px[i * 4] + px[i * 4 + 1] + px[i * 4 + 2] >= BG_LUMA * 3 ? 1 : 0;
+        body[i] = 1;
+      }
+      // Flood the background from the frame border.
+      let head = 0;
+      let tail = 0;
+      const push = (i: number) => {
+        if (light[i] && body[i]) {
+          body[i] = 0;
+          queue[tail++] = i;
+        }
+      };
+      for (let x = 0; x < OCC_W; x++) {
+        push(x);
+        push(N - OCC_W + x);
+      }
+      for (let y = 0; y < OCC_H; y++) {
+        push(y * OCC_W);
+        push(y * OCC_W + OCC_W - 1);
+      }
+      while (head < tail) {
+        const i = queue[head++];
+        const x = i % OCC_W;
+        if (x > 0) push(i - 1);
+        if (x < OCC_W - 1) push(i + 1);
+        if (i >= OCC_W) push(i - OCC_W);
+        if (i < N - OCC_W) push(i + OCC_W);
+      }
+      for (let y = 0; y < OCC_H; y++) closeGaps(y * OCC_W, 1, OCC_W);
+      for (let x = 0; x < OCC_W; x++) closeGaps(x, OCC_W, OCC_H);
+
+      const d = out.data;
+      for (let i = 0; i < N; i++) {
+        const a = body[i] ? 255 : 0;
+        d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = 255;
+        d[i * 4 + 3] = a;
+      }
+      ctx.putImageData(out, 0, 0);
+
+
+      // Once: centre of the head (first rows of the body) → --avatar-x.
+      if (!centred) {
+        let sum = 0;
+        let rows = 0;
+        for (let y = 0; y < OCC_H && rows < 24; y++) {
+          let left = -1;
+          let right = -1;
+          for (let x = 0; x < OCC_W; x++) {
+            if (body[y * OCC_W + x]) {
+              if (left === -1) left = x;
+              right = x;
+            }
+          }
+          if (left === -1) continue;
+          sum += (left + right + 1) / 2;
+          rows++;
+        }
+        if (rows) {
+          centred = true;
+          canvas.parentElement?.style.setProperty('--avatar-x', `${((sum / rows / OCC_W) * 100).toFixed(2)}%`);
+        }
+      }
+    };
+
+    let raf = 0;
+    let vfc = 0;
+    const rvfc = (video as HTMLVideoElement & {
+      requestVideoFrameCallback?: (cb: () => void) => number;
+      cancelVideoFrameCallback?: (id: number) => void;
+    });
+    const loop = () => {
+      draw();
+      if (rvfc.requestVideoFrameCallback) vfc = rvfc.requestVideoFrameCallback(loop);
+      else raf = requestAnimationFrame(loop);
+    };
+    video.addEventListener('loadeddata', draw);
+    video.addEventListener('seeked', draw);
+    loop();
+    return () => {
+      video.removeEventListener('loadeddata', draw);
+      video.removeEventListener('seeked', draw);
+      cancelAnimationFrame(raf);
+      if (vfc) rvfc.cancelVideoFrameCallback?.(vfc);
+    };
+  }, [videoRef, canvasRef]);
+};
+
+/* ---------------------------------------------------------------------------
+   Talking intro video.
+   - Tries to start WITH sound. Browsers block unmuted autoplay until the
+     visitor interacts with the page, so when that happens it plays muted and
+     the voice switches on (from the start of the sentence) at the visitor's
+     first click, tap or key press anywhere on the page.
+   - Pauses as soon as less than 35 % of the hero is visible, resumes on return.
+   - One round ink button toggles the sound (▶ off / ❚❚ on); a soft ping ring
+     shows while the browser is still holding the sound back.
+   ------------------------------------------------------------------------ */
+const HeroVideoPlayer = ({ sectionRef }: { sectionRef: React.RefObject<HTMLElement> }) => {
+  const { t, language } = useLanguage();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [soundOn, setSoundOn] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const visibleRef = useRef(true);
+  const [caption, setCaption] = useState(-1);
+  const occluderRef = useRef<HTMLCanvasElement>(null);
+  useOccluder(videoRef, occluderRef);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const section = sectionRef.current;
+    if (!video || !section) return;
+
+    const unlockEvents = ['pointerdown', 'keydown', 'touchend'] as const;
+    const removeUnlock = () => unlockEvents.forEach((type) => window.removeEventListener(type, unlock));
+
+    // First interaction anywhere on the page: turn the voice on and restart
+    // the sentence. Clicks on the sound button are left to its own handler.
+    function unlock(event: Event) {
+      if (!video) return;
+      removeUnlock();
+      if (buttonRef.current?.contains(event.target as Node)) return;
+      video.muted = false;
+      video.currentTime = 0;
+      if (visibleRef.current) video.play().catch(() => undefined);
+      setSoundOn(true);
+      setTouched(true);
+    }
+
+    if (!prefersReducedMotion()) {
+      video.muted = false;
+      video
+        .play()
+        .then(() => {
+          setSoundOn(true);
+          setTouched(true);
+        })
+        .catch(() => {
+          // Autoplay with sound refused: play muted, wait for an interaction.
+          video.muted = true;
+          video.play().catch(() => undefined);
+          unlockEvents.forEach((type) => window.addEventListener(type, unlock));
+        });
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visibleRef.current = entry.intersectionRatio >= 0.35;
+        if (!visibleRef.current) video.pause();
+        else if (!prefersReducedMotion() || !video.muted) video.play().catch(() => undefined);
+      },
+      { threshold: [0, 0.35, 0.6, 1] },
+    );
+    observer.observe(section);
+    return () => {
+      observer.disconnect();
+      removeUnlock();
+    };
+  }, [sectionRef]);
+
+  const toggleSound = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    setTouched(true);
+    if (video.muted) {
+      video.muted = false;
+      video.currentTime = 0;
+      video.play().catch(() => {
+        video.muted = true;
+        setSoundOn(false);
+      });
+      setSoundOn(true);
+    } else {
+      video.muted = true;
+      setSoundOn(false);
+    }
+  }, []);
+
+  if (!HERO_VIDEO) return null;
+
+  return (
+    <>
+      <canvas ref={occluderRef} width={OCC_W} height={OCC_H} className="hero-occluder" aria-hidden="true" />
+      {/* Dark theme only: a paper-coloured arch the clip is multiplied onto. */}
+      <div className="hero-stage">
+      <video
+        ref={videoRef}
+        muted
+        loop
+        playsInline
+        preload="auto"
+        poster={HERO_VIDEO.poster}
+        aria-label={t('hero.video.label')}
+        onTimeUpdate={(event) => {
+          const time = event.currentTarget.currentTime;
+          setCaption(HERO_CAPTIONS.findIndex((cue) => time >= cue.start && time < cue.end));
+        }}
+      >
+        {HERO_VIDEO.webm && <source src={HERO_VIDEO.webm} type="video/webm" />}
+        <source src={HERO_VIDEO.mp4} type="video/mp4" />
+      </video>
+      </div>
+
+      {/* Burned-in style captions: most visitors watch muted. The full line is
+          also exposed to screen readers once, not cue by cue. */}
+      <p className="sr-only">{HERO_CAPTIONS.map((cue) => cue.text[language]).join(' ')}</p>
+      {/* One control bar under the feet: sound button + caption pill. The pill
+          has a fixed width so the button never moves when the text changes. */}
+      <div className="hero-caption-wrap absolute inset-x-0 top-full mt-2 z-[3] flex items-center justify-center gap-2">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={toggleSound}
+        aria-pressed={soundOn}
+        aria-label={soundOn ? t('hero.sound.off') : t('hero.sound.on')}
+        className={`btn-icon relative shrink-0 ${!touched ? 'sound-ping' : ''}`}
+      >
+        {soundOn ? (
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+            <rect x="2" y="1" width="3.5" height="12" rx="1" fill="currentColor" />
+            <rect x="8.5" y="1" width="3.5" height="12" rx="1" fill="currentColor" />
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+            <path d="M3 1.5v11a.6.6 0 0 0 .9.5l9-5.5a.6.6 0 0 0 0-1l-9-5.5a.6.6 0 0 0-.9.5Z" fill="currentColor" />
+          </svg>
+        )}
+      </button>
+        <p aria-hidden="true" className={`hero-caption pointer-events-none ${caption === -1 ? 'is-empty' : ''}`}>
+          {caption !== -1 && (
+            <span key={caption} className="hero-caption-text">
+              {HERO_CAPTIONS[caption].text[language]}
+            </span>
+          )}
+        </p>
+      </div>
+    </>
+  );
+};
 
 export const HeroSection = () => {
   const { t } = useLanguage();
-  const prefersReducedMotion = useReducedMotion();
-
-  // Headline lines animate in sequence; everything else follows on a shared clock.
-  const rise = (delay: number) => ({
-    initial: { opacity: 0, y: prefersReducedMotion ? 0 : 28 },
-    animate: { opacity: 1, y: 0 },
-    transition: {
-      duration: prefersReducedMotion ? 0.2 : 0.8,
-      delay: prefersReducedMotion ? 0 : delay,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  });
+  const sectionRef = useRef<HTMLElement>(null);
 
   return (
-    <section id="accueil" className="relative overflow-hidden pt-32 md:pt-40">
-      {/* Background: a faint structural grid and a single accent halo, both
-          masked so they never hard-stop at the viewport edge. */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="bg-grid mask-fade-edges absolute inset-0 opacity-60" />
-        <div className="accent-halo absolute left-1/2 top-0 h-[560px] w-[900px] -translate-x-1/2 -translate-y-1/3" />
-      </div>
-
-      <div className="container relative">
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
-          {/* ---- Copy ---- */}
-          <div className="lg:col-span-7">
-            <motion.div {...rise(0)} className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
-                </span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                  {t('hero.status')}
-                </span>
+    <section
+      id="accueil"
+      ref={sectionRef}
+      className="relative flex min-h-[100svh] flex-col overflow-hidden pb-10 pt-[96px]"
+    >
+      <div className="wrap relative flex flex-1 flex-col">
+        <div className="grid flex-1 grid-cols-[minmax(0,1fr)] items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-10">
+          {/* ---- Left: status + heading ---- */}
+          <div className="order-2 min-w-0 lg:order-1 lg:pb-16">
+            <p className="hero-in inline-flex items-center gap-2.5 rounded-full bg-card px-3.5 py-2 shadow-[inset_0_0_0_1px_var(--line-alpha)]" style={stagger(1)}>
+              <span className="relative flex h-2 w-2">
+                {/* "Online" green dot with a pulsing halo. */}
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e] opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#16a34a] shadow-[0_0_6px_rgba(34,197,94,0.7)]" />
               </span>
-            </motion.div>
+              <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.1em] text-ink-2">
+                {t('hero.status')}
+              </span>
+            </p>
 
-            <motion.p
-              {...rise(0.08)}
-              className="mt-8 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground"
-            >
-              {PROFILE.name}
-              <span className="mx-2 text-border-strong">/</span>
-              {t('hero.role')}
-            </motion.p>
-
-            {/* `whitespace-nowrap` keeps each line whole, so the rag stays even
-                and no line ever breaks in an unintended place. */}
-            <h1 className="mt-4 text-display-xl font-semibold text-foreground">
-              {(
-                ['hero.headline.1', 'hero.headline.2', 'hero.headline.3'] as TranslationKey[]
-              ).map((key, index) => (
-                <motion.span
-                  key={key}
-                  {...rise(0.14 + index * 0.08)}
-                  className="block whitespace-nowrap"
-                >
-                  {index === 2 ? (
-                    <span className="text-muted-foreground">
-                      {t(key)}
-                      <span className="text-accent">.</span>
-                    </span>
-                  ) : (
-                    t(key)
-                  )}
-                </motion.span>
-              ))}
+            <h1 className="mt-7 text-[clamp(2.6rem,1.4rem+4.2vw,5.4rem)] font-bold leading-[0.95] tracking-[-0.05em]">
+              <span className="hero-in block" style={stagger(2)}>
+                {t('hero.title')}{' '}
+              </span>
+              <span className="hero-in serif-accent block" style={stagger(3)}>
+                {t('hero.titleAccent')}
+              </span>
             </h1>
-
-            <motion.p {...rise(0.42)} className="lead mt-8 max-w-xl">
-              {t('hero.description')}
-            </motion.p>
-
-            <motion.div {...rise(0.5)} className="mt-10 flex flex-wrap items-center gap-3">
-              <a href="#projets" className="btn-primary group">
-                {t('hero.cta.primary')}
-                <ArrowDown
-                  size={16}
-                  className="transition-transform duration-300 group-hover:translate-y-0.5"
-                />
-              </a>
-              <a href={PROFILE.resume} download className="btn-secondary group">
-                <Download size={16} className="text-muted-foreground" />
-                {t('hero.cta.secondary')}
-              </a>
-            </motion.div>
           </div>
 
-          {/* ---- Portrait ---- */}
-          <motion.div
-            initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-5"
-          >
-            <figure className="group relative mx-auto max-w-sm lg:ml-auto lg:mr-0">
-              {/* Offset frame — a printed-plate device rather than a glow */}
-              <div className="absolute -bottom-3 -right-3 h-full w-full rounded-lg border border-border-strong transition-transform duration-500 ease-editorial group-hover:translate-x-1 group-hover:translate-y-1" />
-
-              <div className="relative overflow-hidden rounded-lg border border-border bg-surface">
-                <img
-                  src={profileImage}
-                  alt={t('hero.portrait.alt')}
-                  width={463}
-                  height={572}
-                  loading="eager"
-                  fetchPriority="high"
-                  className="aspect-[4/5] w-full object-cover object-top grayscale transition-[filter,transform] duration-700 ease-editorial group-hover:scale-[1.02] group-hover:grayscale-0"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
-              </div>
-
-              <figcaption className="absolute bottom-4 left-4 right-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                <span>{PROFILE.name}</span>
-                <span>Tunis</span>
-              </figcaption>
-            </figure>
-          </motion.div>
-        </div>
-
-        {/* ---- Stats ---- */}
-        <motion.dl
-          {...rise(0.6)}
-          className="mt-20 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3"
-        >
-          {HERO_STATS.map((stat) => (
-            <div key={stat.labelKey} className="bg-background px-6 py-7">
-              <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                {t(stat.labelKey)}
-              </dt>
-              <dd className="tabular mt-2 text-4xl font-semibold tracking-tight text-foreground">
-                {stat.value}
-              </dd>
-            </div>
-          ))}
-        </motion.dl>
-      </div>
-
-      {/* ---- Technology marquee ---- */}
-      <motion.div {...rise(0.7)} className="mt-16 border-y border-border py-4">
-        <div className="marquee-paused mask-fade-x overflow-hidden" aria-hidden="true">
-          <div className="marquee-track gap-10 pr-10">
-            {/* Duplicated once so the -50% translation loops seamlessly */}
-            {[...TECH_MARQUEE, ...TECH_MARQUEE].map((tech, index) => (
-              <span
-                key={`${tech}-${index}`}
-                className="whitespace-nowrap font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground"
-              >
-                {tech}
-                <span className="ml-10 text-border-strong">◆</span>
+          {/* ---- Centre: the person ---- */}
+          <div className="relative order-1 flex min-w-0 justify-center lg:order-2">
+            <div className="hero-in hero-blend relative flex w-full justify-center lg:w-auto" style={stagger(1)}>
+            <div className="hero-media">
+              {/* Split in two halves so the seam (between Y and E) sits exactly
+                  on the avatar's centre, whatever the letter widths. */}
+              <span className="hero-ghost" aria-hidden="true">
+                {(() => {
+                  const name = PROFILE.firstName.toUpperCase();
+                  const half = Math.ceil(name.length / 2);
+                  return (
+                    <>
+                      <span className="hero-ghost-l">{ghostLetters(name.slice(0, half), 0)}</span>
+                      <span className="hero-ghost-r">{ghostLetters(name.slice(half), half)}</span>
+                    </>
+                  );
+                })()}
               </span>
-            ))}
+              {HERO_VIDEO ? (
+                <HeroVideoPlayer sectionRef={sectionRef} />
+              ) : (
+                <figure className="hero-portrait">
+                  <img
+                    src={profileImage}
+                    alt={t('hero.portrait.alt')}
+                    width={463}
+                    height={572}
+                    fetchPriority="high"
+                  />
+                  <figcaption className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/55 to-transparent px-6 pb-5 pt-16 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/90">
+                    <span>{PROFILE.name}</span>
+                    <span>{t('hero.location')}</span>
+                  </figcaption>
+                </figure>
+              )}
+            </div>
+            </div>
+          </div>
+
+          {/* ---- Right: pitch + actions ---- */}
+          <div className="order-3 min-w-0 max-w-sm lg:ml-auto lg:pb-16">
+            <p className="hero-in text-[15.5px] leading-relaxed text-muted-foreground" style={stagger(4)}>
+              {t('hero.description')}
+            </p>
+            <div className="hero-in mt-7 flex flex-wrap gap-2.5" style={stagger(5)}>
+              <a href="#projets" className="btn-primary">
+                {t('hero.cta.work')}
+                <ArrowUpRight size={15} />
+              </a>
+              <a href="#contact" className="btn-secondary">
+                {t('hero.cta.talk')}
+              </a>
+            </div>
+            {/* The CV is a quiet text link under the two buttons, so no button
+                is ever left alone on its own line. */}
+            <ResumeDialog>
+              <button
+                type="button"
+                className="hero-in link-underline mt-5 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-2 hover:text-foreground"
+                style={stagger(6)}
+              >
+                <ArrowDown size={13} aria-hidden="true" />
+                {t('hero.cta.resumeLink')}
+              </button>
+            </ResumeDialog>
           </div>
         </div>
-      </motion.div>
 
-      {/* ---- Scroll cue ---- */}
-      <motion.div {...rise(0.8)} className="container mt-10 pb-8">
-        <a
-          href="#profil"
-          className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {t('hero.scroll')}
-          <motion.span
-            animate={prefersReducedMotion ? undefined : { y: [0, 4, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-            className="inline-flex"
-          >
-            <ArrowUpRight size={13} className="rotate-45" />
-          </motion.span>
-        </a>
-      </motion.div>
+        {/* Room for the video control bar that hangs under the avatar. */}
+        <div className="h-14 lg:h-16" aria-hidden="true" />
+      </div>
     </section>
   );
 };

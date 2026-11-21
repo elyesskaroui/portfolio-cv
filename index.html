@@ -3,9 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0c0c0e" />
+    <meta name="theme-color" content="#f4f2ee" />
+    <!-- Theme before first paint (no flash): stored choice, else the OS. -->
+    <script>
+      (function () {
+        var theme = null;
+        try { theme = localStorage.getItem('theme'); } catch (e) {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#131210');
+        }
+      })();
+    </script>
 
-    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
     <!-- Fonts: warm the connection, then load the stylesheet without blocking
@@ -17,25 +34,25 @@
     <link
       rel="preload"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400..800;1,400..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
     />
     <link
       rel="stylesheet"
       media="print"
       onload="this.media='all'; this.onload=null;"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400..800;1,400..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
     />
     <noscript>
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400..800;1,400..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
       />
     </noscript>
 
     <title>Karoui Elyess — Ingénieur Full Stack & Développeur Mobile</title>
     <meta
       name="description"
-      content="Portfolio de Karoui Elyess, ingénieur full stack spécialisé en développement mobile (Flutter, SwiftUI, Kotlin) et backend (NestJS, Node.js, Python). Diplômé d'ESPRIT en 2026, disponible immédiatement."
+      content="Portfolio de Karoui Elyess, ingénieur full stack spécialisé en développement mobile (Flutter, SwiftUI, Kotlin) et backend (NestJS, Node.js, Python). Diplômé d’ESPRIT en 2026, disponible immédiatement."
     />
     <meta name="author" content="Karoui Elyess" />
     <link rel="canonical" href="https://elyess-karoui.vercel.app/" />
@@ -46,10 +63,12 @@
     <meta property="og:title" content="Karoui Elyess — Ingénieur Full Stack & Développeur Mobile" />
     <meta
       property="og:description"
-      content="Applications mobiles et APIs pensées pour durer. Découvrez mes projets, mon parcours et ma stack."
+      content="Applications mobiles et API pensées pour durer. Découvrez mes projets, mon parcours et ma stack."
     />
     <meta property="og:url" content="https://elyess-karoui.vercel.app/" />
     <meta property="og:image" content="https://elyess-karoui.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Karoui Elyess, ingénieur full stack" />
     <meta property="og:locale" content="fr_FR" />
     <meta property="og:locale:alternate" content="en_US" />
@@ -59,7 +78,7 @@
     <meta name="twitter:title" content="Karoui Elyess — Ingénieur Full Stack & Développeur Mobile" />
     <meta
       name="twitter:description"
-      content="Applications mobiles et APIs pensées pour durer. Découvrez mes projets, mon parcours et ma stack."
+      content="Applications mobiles et API pensées pour durer. Découvrez mes projets, mon parcours et ma stack."
     />
     <meta name="twitter:image" content="https://elyess-karoui.vercel.app/og-image.png" />
 
